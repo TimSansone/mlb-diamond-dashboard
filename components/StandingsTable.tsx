@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { StandingsTeamRecord } from "@/types/mlb";
 
 function teamLogoUrl(teamId: number): string {
@@ -45,10 +46,10 @@ export default function StandingsTable({
               <tr key={team.team.id}>
                 <td className="rankColumn">{wildCard ? team.wildCardRank ?? index + 1 : team.divisionRank ?? index + 1}</td>
                 <td className="teamColumn">
-                  <span className="standingsTeam">
+                  <Link className="standingsTeam" href={`/teams/${team.team.id}`}>
                     <img src={teamLogoUrl(team.team.id)} alt="" width={32} height={32} />
                     <strong>{team.team.name}</strong>
-                  </span>
+                  </Link>
                 </td>
                 <td>{team.wins}</td>
                 <td>{team.losses}</td>
