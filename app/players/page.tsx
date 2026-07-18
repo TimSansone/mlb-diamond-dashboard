@@ -11,7 +11,7 @@ type Player = {
   currentTeam?: { id: number; name: string };
 };
 
-type SearchResponse = { people?: Player[] };
+type SearchResponse = { people?: Player[]; error?: string };
 
 function headshot(id: number) {
   return `https://img.mlbstatic.com/mlb-photos/image/upload/w_160,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`;
@@ -31,20 +31,27 @@ export default function PlayersPage() {
   async function searchPlayers(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const name = query.trim();
-    if (name.length < 2) return;
+    if (name.length < 2 || loading) return;
 
     setLoading(true);
     setError("");
     setSearched(true);
+    setPlayers([]);
 
     try {
-      const response = await fetch(`https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(name)}&sportIds=1`);
-      if (!response.ok) throw new Error("Player search failed");
+      const response = await fetch(`/api/players/search?q=${encodeURIComponent(name)}`, {
+        headers: { Accept: "application/json" },
+      });
       const data = (await response.json()) as SearchResponse;
-      setPlayers((data.people ?? []).slice(0, 30));
-    } catch {
+
+      if (!response.ok) {
+        throw new Error(data.error || "Player search failed");
+      }
+
+      setPlayers(data.people ?? []);
+    } catch (searchError) {
       setPlayers([]);
-      setError("We could not search MLB players right now. Please try again.");
+      setError(searchError instanceof Error ? searchError.message : "We could not search MLB players right now.");
     } finally {
       setLoading(false);
     }
@@ -55,7 +62,7 @@ export default function PlayersPage() {
       <header className={styles.hero}>
         <span className="eyebrow">Player directory</span>
         <h1>MLB Player Search</h1>
-        <p>Find an active MLB player and open a full profile with season statistics and career details.</p>
+        <p>Find an MLB player and open a profile with current-season statistics, career totals, and biographical information.</p>
       </header>
 
       <form className={styles.search} onSubmit={searchPlayers}>
@@ -68,6 +75,8 @@ export default function PlayersPage() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Try Aaron Judge or Shohei Ohtani"
             minLength={2}
+            autoComplete="off"
+            spellCheck={false}
           />
           <button type="submit" disabled={loading || query.trim().length < 2}>
             {loading ? "Searching..." : "Search"}
@@ -75,12 +84,12 @@ export default function PlayersPage() {
         </div>
       </form>
 
-      {error ? <p className={styles.notice}>{error}</p> : null}
+      {error ? <p className={styles.notice} role="alert">{error}</p> : null}
       {searched && !loading && !error && players.length === 0 ? (
-        <p className={styles.notice}>No MLB players matched that search.</p>
+        <p className={styles.notice}>No MLB players matched that search. Try a full first and last name.</p>
       ) : null}
 
-      <section className={styles.grid} aria-live="polite">
+      <section className={styles.grid} aria-live="polite" aria-busy={loading}>
         {players.map((player) => (
           <Link className={styles.playerCard} href={`/players/${player.id}`} key={player.id}>
             <img className={styles.headshot} src={headshot(player.id)} alt="" width={96} height={96} />
@@ -93,10 +102,10 @@ export default function PlayersPage() {
                   {player.currentTeam.name}
                 </span>
               ) : (
-                <span>Team unavailable</span>
+                <span>Current team unavailable</span>
               )}
             </div>
-            <span className={styles.arrow}>→</span>
+            <span className={styles.arrow} aria-hidden="true">→</span>
           </Link>
         ))}
       </section>
