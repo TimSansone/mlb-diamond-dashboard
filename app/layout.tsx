@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ScoreTicker from "@/components/ScoreTicker";
 import "./globals.css";
 import "./design-system.css";
 import "./mobile.css";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <Link href="/schedule">Schedule</Link>
           </nav>
         </header>
+        <ScoreTicker />
         <main>{children}</main>
       </body>
     </html>
