@@ -1,14 +1,20 @@
 .page { display: grid; gap: 24px; }
 .hero { padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
-.hero h1 { margin: 5px 0 8px; font-size: clamp(2rem, 5vw, 3.25rem); letter-spacing: -.045em; }
-.hero p { max-width: 700px; margin: 0; color: var(--muted); line-height: 1.55; }
-.league { display: grid; gap: 14px; }
-.league h2 { margin: 0; }
-.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.card { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 14px; padding: 17px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); transition: transform 150ms ease, border-color 150ms ease; }
-.card:hover { transform: translateY(-2px); border-color: var(--primary); }
-.card img { width: 56px; height: 56px; object-fit: contain; }
-.card strong { display: block; margin-bottom: 4px; }
-.card span { color: var(--muted); font-size: .8rem; }
-@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+.hero h1 { margin: 4px 0 10px; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.045em; }
+.hero p { max-width: 720px; margin: 0; color: var(--muted); line-height: 1.6; }
+.divisions { display: grid; gap: 20px; }
+.division { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+.divisionHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.divisionHeader h2 { margin: 0; font-size: 1.2rem; }
+.divisionHeader span { color: var(--muted); font-size: .82rem; }
+.teamGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.teamCard { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 14px; min-height: 96px; padding: 16px 20px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background 150ms ease; }
+.teamCard:hover { background: var(--surface-muted); }
+.teamCard:focus-visible { outline: 3px solid rgba(11, 59, 112, .3); outline-offset: -3px; }
+.teamCard img { width: 58px; height: 58px; object-fit: contain; }
+.teamCard > span { display: grid; min-width: 0; gap: 5px; }
+.teamCard strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teamCard small { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; }
+.teamCard b { color: var(--primary); font-size: 1.2rem; }
+@media (max-width: 900px) { .teamGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .hero { padding: 22px; } .teamGrid { grid-template-columns: 1fr; } .teamCard { border-right: 0; } }
