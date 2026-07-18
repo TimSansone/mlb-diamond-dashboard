@@ -1,5 +1,6 @@
 import StandingsTable from "@/components/StandingsTable";
 import { getCurrentSeason, getStandings } from "@/lib/mlb";
+import "./standings.css";
 
 export default async function StandingsPage() {
   const season = getCurrentSeason();
