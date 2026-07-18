@@ -18,11 +18,11 @@
 
 .game {
   display: grid;
-  grid-template-columns: auto minmax(42px, auto) auto;
+  grid-template-columns: 48px 58px 48px;
   align-items: center;
-  gap: 8px;
-  min-width: 150px;
-  padding: 7px 10px;
+  gap: 6px;
+  min-width: 178px;
+  padding: 7px 9px;
   color: #fff;
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.12);
@@ -37,29 +37,42 @@
 }
 
 .teamRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: 28px 18px;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
 }
 
 .teamRow img {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 
 .teamRow strong {
-  min-width: 16px;
+  min-width: 18px;
   font-size: .95rem;
+  line-height: 1;
   text-align: center;
 }
 
 .status {
-  color: rgba(255,255,255,.72);
-  font-size: .66rem;
+  display: grid;
+  place-items: center;
+  min-width: 58px;
+  min-height: 28px;
+  padding: 3px 5px;
+  overflow: hidden;
+  color: rgba(255,255,255,.82);
+  background: rgba(0,0,0,.22);
+  border-radius: 6px;
+  font-size: .64rem;
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1;
   text-align: center;
+  text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -85,20 +98,29 @@
   }
 
   .game {
-    min-width: 136px;
-    padding: 6px 8px;
+    grid-template-columns: 44px 52px 44px;
+    min-width: 160px;
+    gap: 4px;
+    padding: 6px 7px;
+  }
+
+  .teamRow {
+    grid-template-columns: 25px 17px;
   }
 
   .teamRow img {
-    width: 22px;
-    height: 22px;
+    width: 23px;
+    height: 23px;
   }
 
   .teamRow strong {
-    font-size: .88rem;
+    font-size: .86rem;
   }
 
   .status {
-    font-size: .6rem;
+    min-width: 52px;
+    min-height: 26px;
+    padding-inline: 4px;
+    font-size: .57rem;
   }
 }
