@@ -1,36 +1,70 @@
-.page { display: grid; gap: 22px; }
-.hero { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
-.logo { width: 112px; height: 112px; object-fit: contain; }
-.hero h1 { margin: 4px 0 8px; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.045em; }
+.page { display: grid; gap: 24px; }
+.back { width: fit-content; color: var(--primary); font-weight: 800; }
+.hero { display: grid; grid-template-columns: 132px minmax(0, 1fr) auto; align-items: center; gap: 28px; padding: 30px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow); }
+.logo { width: 124px; height: 124px; object-fit: contain; }
+.heroCopy { min-width: 0; }
+.hero h1 { margin: 4px 0 8px; font-size: clamp(2.1rem, 5vw, 3.75rem); letter-spacing: -.05em; }
 .meta { margin: 0; color: var(--muted); line-height: 1.55; }
-.record { display: grid; min-width: 170px; gap: 4px; padding: 18px 22px; text-align: center; background: var(--surface-muted); border: 1px solid var(--border); border-radius: 16px; }
-.record strong { font-size: 2rem; }
-.record span { color: var(--muted); font-size: .85rem; font-weight: 700; }
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.heroLinks { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-top: 16px; }
+.heroLinks a { color: var(--primary); font-size: .86rem; font-weight: 800; }
+.record { display: grid; min-width: 205px; gap: 5px; padding: 20px 24px; text-align: center; background: var(--surface-muted); border: 1px solid var(--border); border-radius: 18px; }
+.record strong { font-size: 2.2rem; }
+.record span { color: var(--muted); font-size: .84rem; font-weight: 700; }
+.dashboardStats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.dashboardStats > div { display: grid; gap: 5px; min-height: 118px; padding: 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 15px; box-shadow: var(--shadow); }
+.dashboardStats span { color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.dashboardStats strong { font-size: 1.75rem; }
+.dashboardStats small { color: var(--muted); font-size: .77rem; }
+.formStrip { display: flex; gap: 5px; }
+.formStrip i { display: inline-grid; width: 24px; height: 24px; place-items: center; color: #fff; border-radius: 50%; font-size: .7rem; font-style: normal; font-weight: 900; }
+.formWin { background: var(--success); }
+.formLoss { background: var(--live); }
+.featureGrid { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(0, 1.15fr); gap: 18px; }
+.nextGameCard { display: grid; align-content: start; gap: 10px; padding: 24px; background: linear-gradient(145deg, var(--primary), var(--primary-strong)); color: #fff; border-radius: 18px; box-shadow: var(--shadow); transition: transform 150ms ease; }
+.nextGameCard:hover { transform: translateY(-2px); }
+.nextGameHeading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.nextGameHeading h2 { margin: 5px 0 0; font-size: clamp(1.4rem, 3vw, 2rem); }
+.nextGameHeading img { width: 72px; height: 72px; padding: 8px; object-fit: contain; background: rgba(255,255,255,.94); border-radius: 14px; }
+.nextGameCard :global(.eyebrow) { color: #cfe1f4; }
+.nextGameTime { font-size: 1.05rem; }
+.nextGameCard p { margin: 0; color: rgba(255,255,255,.78); }
+.pitchingMatchup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 8px; }
+.pitchingMatchup span { display: grid; gap: 3px; padding: 11px 12px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); border-radius: 10px; }
+.pitchingMatchup small { color: rgba(255,255,255,.7); font-size: .68rem; text-transform: uppercase; }
 .card { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
 .cardHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
 .cardHeader h2 { margin: 0; font-size: 1.2rem; }
 .cardHeader span { color: var(--muted); font-size: .8rem; }
 .gameList, .leaderList, .rosterList { margin: 0; padding: 0; list-style: none; }
-.gameLink { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background 150ms ease; }
+.gameLink { display: grid; grid-template-columns: 76px 36px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--border); transition: background 150ms ease; }
 .gameLink:hover { background: var(--surface-muted); }
 .date { color: var(--muted); font-size: .8rem; }
-.opponent { display: grid; gap: 3px; }
+.opponentLogo { width: 34px; height: 34px; object-fit: contain; }
+.opponent { display: grid; gap: 3px; min-width: 0; }
 .opponent strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.opponent span { color: var(--muted); font-size: .78rem; }
+.opponent span { color: var(--muted); font-size: .76rem; }
 .score { font-weight: 900; }
 .resultWin { color: var(--success); }
 .resultLoss { color: var(--live); }
+.resultLive { color: var(--live); }
+.sectionHeading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-top: 4px; }
+.sectionHeading h2 { margin: 5px 0 0; font-size: 1.7rem; }
+.sectionHeading a { color: var(--primary); font-size: .88rem; font-weight: 800; }
 .leaders { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.leaderList li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
-.leaderList strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.leaderList span { color: var(--primary); font-weight: 900; }
+.leaderList li { display: grid; grid-template-columns: 24px 42px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.leaderList img { width: 42px; height: 42px; object-fit: cover; background: var(--surface-muted); border-radius: 50%; }
+.leaderRank { color: var(--muted); font-size: .8rem; font-weight: 900; }
+.leaderList a { min-width: 0; }
+.leaderList strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderValue { color: var(--primary); font-weight: 900; }
 .rosterSection { padding: 0 20px 20px; }
 .rosterGroup h3 { margin: 20px 0 10px; color: var(--primary); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
 .rosterList { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 14px; }
 .rosterList li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 8px; padding: 9px 10px; background: var(--surface-muted); border-radius: 9px; }
 .rosterList span { color: var(--muted); }
-.empty { padding: 24px 20px; color: var(--muted); }
-.back { width: fit-content; color: var(--primary); font-weight: 800; }
-@media (max-width: 900px) { .hero { grid-template-columns: 90px minmax(0, 1fr); } .logo { width: 86px; height: 86px; } .record { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); } .leaders { grid-template-columns: 1fr; } .rosterList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 680px) { .hero { grid-template-columns: 70px minmax(0, 1fr); padding: 20px; } .logo { width: 66px; height: 66px; } .grid { grid-template-columns: 1fr; } .gameLink { grid-template-columns: 72px minmax(0, 1fr) auto; padding: 13px 14px; } .rosterList { grid-template-columns: 1fr; } }
+.rosterList a { min-width: 0; }
+.rosterList strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty { margin: 0; padding: 24px 20px; color: var(--muted); }
+@media (max-width: 1050px) { .dashboardStats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .leaders { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .hero { grid-template-columns: 96px minmax(0, 1fr); } .logo { width: 92px; height: 92px; } .record { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); } .featureGrid { grid-template-columns: 1fr; } .rosterList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .hero { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; padding: 20px; } .logo { width: 68px; height: 68px; } .record { grid-template-columns: 1fr; min-width: 0; } .dashboardStats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dashboardStats > div:last-child { grid-column: 1 / -1; } .leaders { grid-template-columns: 1fr; } .gameLink { grid-template-columns: 58px 30px minmax(0, 1fr) auto; gap: 8px; padding: 12px; } .opponentLogo { width: 30px; height: 30px; } .pitchingMatchup { grid-template-columns: 1fr; } .rosterList { grid-template-columns: 1fr; } .sectionHeading { align-items: flex-start; flex-direction: column; } }
