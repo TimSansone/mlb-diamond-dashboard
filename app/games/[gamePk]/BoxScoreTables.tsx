@@ -25,6 +25,7 @@ type ExtendedPlayer = BoxscorePlayer & {
 };
 
 type ExtendedTeamBoxscore = TeamBoxscore & {
+  batters?: number[];
   pitchers?: number[];
   players?: Record<string, ExtendedPlayer>;
 };
@@ -41,18 +42,29 @@ function playerMap(team?: ExtendedTeamBoxscore) {
   );
 }
 
+function uniqueIds(ids: number[]) {
+  return [...new Set(ids)];
+}
+
 function battingPlayers(team?: ExtendedTeamBoxscore) {
   const map = playerMap(team);
-  const ordered = (team?.battingOrder ?? []).map((id) => map.get(id)).filter(Boolean) as ExtendedPlayer[];
-  const extras = [...map.values()]
-    .filter((player) => !team?.battingOrder?.includes(player.person?.id ?? -1) && player.stats?.batting)
-    .sort((a, b) => Number(a.battingOrder ?? 9999) - Number(b.battingOrder ?? 9999));
-  return [...ordered, ...extras];
+
+  // MLB's `batters` array contains only hitters who were placed in the
+  // lineup or entered the game. It excludes unused players on the active roster.
+  const participantIds = uniqueIds(team?.batters ?? team?.battingOrder ?? []);
+
+  return participantIds
+    .map((id) => map.get(id))
+    .filter(Boolean) as ExtendedPlayer[];
 }
 
 function pitchingPlayers(team?: ExtendedTeamBoxscore) {
   const map = playerMap(team);
-  return (team?.pitchers ?? []).map((id) => map.get(id)).filter(Boolean) as ExtendedPlayer[];
+
+  // MLB's `pitchers` array is ordered by appearance and excludes unused arms.
+  return uniqueIds(team?.pitchers ?? [])
+    .map((id) => map.get(id))
+    .filter(Boolean) as ExtendedPlayer[];
 }
 
 function PlayerCell({ player }: { player: ExtendedPlayer }) {
@@ -101,7 +113,7 @@ function BattingTable({ teamName, team }: { teamName: string; team?: ExtendedTea
             </tbody>
           </table>
         </div>
-      ) : <p className={styles.empty}>Individual batting lines will appear when MLB publishes the box score.</p>}
+      ) : <p className={styles.empty}>Individual batting lines will appear when MLB publishes the lineup or a hitter enters the game.</p>}
     </section>
   );
 }
@@ -123,7 +135,7 @@ function PitchingTable({ teamName, team }: { teamName: string; team?: ExtendedTe
             </tbody>
           </table>
         </div>
-      ) : <p className={styles.empty}>Individual pitching lines will appear when the game begins.</p>}
+      ) : <p className={styles.empty}>Individual pitching lines will appear when a pitcher enters the game.</p>}
     </section>
   );
 }
@@ -131,7 +143,7 @@ function PitchingTable({ teamName, team }: { teamName: string; team?: ExtendedTe
 export default function BoxScoreTables({ awayName, homeName, away, home }: { awayName: string; homeName: string; away?: ExtendedTeamBoxscore; home?: ExtendedTeamBoxscore }) {
   return (
     <section className={styles.boxScoreSection}>
-      <div className={styles.sectionHeading}><div><span className="eyebrow">Complete box score</span><h2>Individual player lines</h2></div><p>Live batting and pitching totals from the MLB game feed.</p></div>
+      <div className={styles.sectionHeading}><div><span className="eyebrow">Complete box score</span><h2>Individual player lines</h2></div><p>Only starters and players who entered the game are shown.</p></div>
       <div className={styles.boxScoreGrid}>
         <BattingTable teamName={awayName} team={away} />
         <BattingTable teamName={homeName} team={home} />
