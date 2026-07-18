@@ -120,7 +120,8 @@ function DefensiveAlignment({ defense }: { defense?: Defense }) {
 }
 
 export default function LiveGameFeatures({ playEvents, defense }: { playEvents?: PitchEvent[]; defense?: Defense }) {
-  const pitches = (playEvents ?? []).filter((event) => event.details?.isPitch);
+  // Some MLB feeds omit details.isPitch even when pitchData is present.
+  const pitches = (playEvents ?? []).filter((event) => event.details?.isPitch || Boolean(event.pitchData));
   return (
     <section className={styles.liveFeatureGrid}>
       <PitchSequence pitches={pitches} />
