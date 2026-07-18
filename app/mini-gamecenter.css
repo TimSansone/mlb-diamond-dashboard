@@ -1,0 +1,131 @@
+.liveGameCard {
+  border-color: rgba(189, 30, 45, .28);
+  box-shadow: 0 12px 34px rgba(189, 30, 45, .09);
+}
+
+.miniGameCenter {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #0a2647, #123f6f);
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+
+.miniSituationTop {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.miniDiamond {
+  position: relative;
+  width: 76px;
+  height: 62px;
+  margin: 0 auto;
+}
+
+.miniDiamond::before {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255,255,255,.32);
+  transform: translateX(-50%) rotate(45deg);
+  content: "";
+}
+
+.miniBase {
+  position: absolute;
+  z-index: 1;
+  width: 13px;
+  height: 13px;
+  background: rgba(255,255,255,.18);
+  border: 2px solid rgba(255,255,255,.82);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.miniBase.occupied {
+  background: #f5c542;
+  border-color: #fff4b5;
+  box-shadow: 0 0 10px rgba(245,197,66,.52);
+}
+
+.miniSecond { top: 2px; left: 31px; }
+.miniThird { top: 24px; left: 9px; }
+.miniFirst { top: 24px; right: 9px; }
+
+.miniHome {
+  position: absolute;
+  bottom: 2px;
+  left: 32px;
+  width: 12px;
+  height: 10px;
+  background: rgba(255,255,255,.68);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+}
+
+.miniCount {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+}
+
+.miniCount span {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 9px 5px;
+  color: rgba(255,255,255,.7);
+  border-right: 1px solid rgba(255,255,255,.12);
+  font-size: .62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.miniCount span:last-child { border-right: 0; }
+.miniCount b { color: #fff; font-size: 1rem; }
+
+.miniMatchup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.miniMatchup > div {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  padding: 9px 10px;
+  background: rgba(0,0,0,.16);
+  border-radius: 9px;
+}
+
+.miniMatchup span {
+  color: rgba(255,255,255,.62);
+  font-size: .62rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.miniMatchup strong {
+  overflow: hidden;
+  font-size: .78rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 420px) {
+  .miniGameCenter { padding: 12px; }
+  .miniSituationTop { grid-template-columns: 72px minmax(0, 1fr); gap: 10px; }
+  .miniDiamond { transform: scale(.9); }
+  .miniMatchup { grid-template-columns: 1fr; }
+  .miniCount span { padding-inline: 3px; font-size: .57rem; }
+}
