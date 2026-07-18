@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import styles from "./game.module.css";
+
+type TeamStats = Record<string, number | string>;
 
 type GameFeed = {
   gameData: {
@@ -33,8 +36,8 @@ type GameFeed = {
     };
     boxscore?: {
       teams?: {
-        away?: { teamStats?: { batting?: Record<string, number | string>; pitching?: Record<string, number | string> } };
-        home?: { teamStats?: { batting?: Record<string, number | string>; pitching?: Record<string, number | string> } };
+        away?: { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
+        home?: { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
       };
     };
   };
@@ -47,6 +50,7 @@ function logo(teamId: number) {
 async function getGame(gamePk: string): Promise<GameFeed> {
   const response = await fetch(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, {
     next: { revalidate: 15 },
+    headers: { Accept: "application/json" },
   });
 
   if (response.status === 404) notFound();
@@ -54,29 +58,40 @@ async function getGame(gamePk: string): Promise<GameFeed> {
   return response.json();
 }
 
-function TeamHeader({ team, score }: { team: { id: number; name: string }; score?: number }) {
+function TeamHeader({ team, score, side }: { team: { id: number; name: string }; score?: number; side: string }) {
   return (
-    <div className="gameCenterTeam">
-      <img src={logo(team.id)} alt="" width={72} height={72} />
-      <strong>{team.name}</strong>
-      <span>{score ?? 0}</span>
+    <div className={styles.team}>
+      <img src={logo(team.id)} alt={`${team.name} logo`} width={72} height={72} />
+      <Link className={styles.teamName} href={`/teams/${team.id}`}>
+        <span>{side}</span>
+        <strong>{team.name}</strong>
+      </Link>
+      <span className={styles.score}>{score ?? 0}</span>
     </div>
   );
 }
 
-function StatSummary({ title, stats }: { title: string; stats?: Record<string, number | string> }) {
-  const rows = [
-    ["Runs", stats?.runs],
-    ["Hits", stats?.hits],
-    ["Home runs", stats?.homeRuns],
-    ["Walks", stats?.baseOnBalls],
-    ["Strikeouts", stats?.strikeOuts],
-  ];
+function StatSummary({ title, stats, type }: { title: string; stats?: TeamStats; type: "batting" | "pitching" }) {
+  const rows = type === "batting"
+    ? [
+        ["Runs", stats?.runs],
+        ["Hits", stats?.hits],
+        ["Home runs", stats?.homeRuns],
+        ["Walks", stats?.baseOnBalls],
+        ["Strikeouts", stats?.strikeOuts],
+      ]
+    : [
+        ["Innings", stats?.inningsPitched],
+        ["Hits allowed", stats?.hits],
+        ["Runs allowed", stats?.runs],
+        ["Walks", stats?.baseOnBalls],
+        ["Strikeouts", stats?.strikeOuts],
+      ];
 
   return (
-    <section className="detailCard">
+    <section className={styles.card}>
       <h2>{title}</h2>
-      <dl className="statList">
+      <dl className={styles.statList}>
         {rows.map(([label, value]) => (
           <div key={label}>
             <dt>{label}</dt>
@@ -86,6 +101,23 @@ function StatSummary({ title, stats }: { title: string; stats?: Record<string, n
       </dl>
     </section>
   );
+}
+
+function gameContext(game: GameFeed) {
+  const line = game.liveData.linescore;
+  if (line?.currentInningOrdinal) {
+    return `${line.inningHalf ?? ""} ${line.currentInningOrdinal}`.trim();
+  }
+
+  const date = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "America/New_York",
+  }).format(new Date(game.gameData.datetime.dateTime));
+
+  return [date, game.gameData.venue?.name].filter(Boolean).join(" · ");
 }
 
 export default async function GameCenterPage({ params }: { params: Promise<{ gamePk: string }> }) {
@@ -98,71 +130,97 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   const awayTotals = line?.teams?.away;
   const homeTotals = line?.teams?.home;
   const innings = line?.innings ?? [];
-  const scoringPlays = (game.liveData.plays?.allPlays ?? []).filter((play) => play.about?.isScoringPlay);
-  const awayBatting = game.liveData.boxscore?.teams?.away?.teamStats?.batting;
-  const homeBatting = game.liveData.boxscore?.teams?.home?.teamStats?.batting;
+  const allPlays = game.liveData.plays?.allPlays ?? [];
+  const scoringPlays = allPlays.filter((play) => play.about?.isScoringPlay);
+  const recentPlays = allPlays.slice(-10).reverse();
+  const awayStats = game.liveData.boxscore?.teams?.away?.teamStats;
+  const homeStats = game.liveData.boxscore?.teams?.home?.teamStats;
 
   return (
-    <div className="gameCenter">
-      <Link className="backLink" href="/">← Back to scoreboard</Link>
+    <div className={styles.page}>
+      <Link className={styles.back} href="/">← Back to scoreboard</Link>
 
-      <header className="gameCenterHero">
-        <TeamHeader team={away} score={awayTotals?.runs} />
-        <div className="gameCenterStatus">
+      <header className={styles.hero}>
+        <TeamHeader team={away} score={awayTotals?.runs} side="Away" />
+        <div className={styles.status}>
           <span className="eyebrow">Game Center</span>
           <strong>{game.gameData.status.detailedState}</strong>
-          <span>{line?.currentInningOrdinal ? `${line.inningHalf ?? ""} ${line.currentInningOrdinal}`.trim() : game.gameData.venue?.name ?? ""}</span>
+          <span>{gameContext(game)}</span>
         </div>
-        <TeamHeader team={home} score={homeTotals?.runs} />
+        <TeamHeader team={home} score={homeTotals?.runs} side="Home" />
       </header>
 
-      <section className="detailCard lineScoreCard">
+      <section className={styles.card}>
         <h2>Line score</h2>
-        <div className="tableScroll">
-          <table className="lineScoreTable">
-            <thead>
-              <tr>
-                <th>Team</th>
-                {innings.map((inning) => <th key={inning.num}>{inning.num}</th>)}
-                <th>R</th><th>H</th><th>E</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>{away.name}</th>
-                {innings.map((inning) => <td key={inning.num}>{inning.away?.runs ?? "—"}</td>)}
-                <td>{awayTotals?.runs ?? 0}</td><td>{awayTotals?.hits ?? 0}</td><td>{awayTotals?.errors ?? 0}</td>
-              </tr>
-              <tr>
-                <th>{home.name}</th>
-                {innings.map((inning) => <td key={inning.num}>{inning.home?.runs ?? "—"}</td>)}
-                <td>{homeTotals?.runs ?? 0}</td><td>{homeTotals?.hits ?? 0}</td><td>{homeTotals?.errors ?? 0}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <div className="detailGrid">
-        <StatSummary title={`${away.name} batting`} stats={awayBatting} />
-        <StatSummary title={`${home.name} batting`} stats={homeBatting} />
-      </div>
-
-      <section className="detailCard">
-        <h2>Scoring plays</h2>
-        {scoringPlays.length ? (
-          <ol className="playList">
-            {scoringPlays.map((play, index) => (
-              <li key={`${play.about?.inning}-${index}`}>
-                <span>{play.about?.halfInning} {play.about?.inning}</span>
-                <p>{play.result?.description ?? play.result?.event ?? "Scoring play"}</p>
-              </li>
-            ))}
-          </ol>
+        {innings.length ? (
+          <div className={styles.tableScroll}>
+            <table className={styles.lineScore}>
+              <thead>
+                <tr>
+                  <th>Team</th>
+                  {innings.map((inning) => <th key={inning.num}>{inning.num}</th>)}
+                  <th>R</th><th>H</th><th>E</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>{away.name}</th>
+                  {innings.map((inning) => <td key={inning.num}>{inning.away?.runs ?? "—"}</td>)}
+                  <td>{awayTotals?.runs ?? 0}</td><td>{awayTotals?.hits ?? 0}</td><td>{awayTotals?.errors ?? 0}</td>
+                </tr>
+                <tr>
+                  <th>{home.name}</th>
+                  {innings.map((inning) => <td key={inning.num}>{inning.home?.runs ?? "—"}</td>)}
+                  <td>{homeTotals?.runs ?? 0}</td><td>{homeTotals?.hits ?? 0}</td><td>{homeTotals?.errors ?? 0}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p className="mutedText">No scoring plays are available yet.</p>
+          <p className={styles.empty}>The line score will appear when game data becomes available.</p>
         )}
       </section>
+
+      <div className={styles.grid}>
+        <StatSummary title={`${away.name} batting`} stats={awayStats?.batting} type="batting" />
+        <StatSummary title={`${home.name} batting`} stats={homeStats?.batting} type="batting" />
+        <StatSummary title={`${away.name} pitching`} stats={awayStats?.pitching} type="pitching" />
+        <StatSummary title={`${home.name} pitching`} stats={homeStats?.pitching} type="pitching" />
+      </div>
+
+      <div className={styles.grid}>
+        <section className={styles.card}>
+          <h2>Scoring plays</h2>
+          {scoringPlays.length ? (
+            <ol className={styles.playList}>
+              {scoringPlays.map((play, index) => (
+                <li key={`${play.about?.inning}-${index}`}>
+                  <span>{play.about?.halfInning} {play.about?.inning}</span>
+                  <p>{play.result?.description ?? play.result?.event ?? "Scoring play"}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className={styles.empty}>No scoring plays are available yet.</p>
+          )}
+        </section>
+
+        <section className={styles.card}>
+          <h2>Recent plays</h2>
+          {recentPlays.length ? (
+            <ol className={styles.playList}>
+              {recentPlays.map((play, index) => (
+                <li key={`recent-${play.about?.inning}-${index}`}>
+                  <span>{play.about?.halfInning} {play.about?.inning}</span>
+                  <p>{play.result?.description ?? play.result?.event ?? "Play update"}</p>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className={styles.empty}>Play-by-play will appear when the game begins.</p>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
