@@ -85,6 +85,13 @@ function gameStatusLabel(game: TickerGame) {
   return `Live, inning ${inning}`;
 }
 
+function tickerPriority(game: TickerGame) {
+  const state = game.status.abstractGameState;
+  if (state === "Live") return 0;
+  if (state === "Final") return 2;
+  return 1;
+}
+
 async function requestScores(date: string): Promise<ScheduleResponse> {
   const stamp = Date.now().toString();
   const internal = await fetch(`/api/scores?date=${date}&_=${stamp}`, {
@@ -114,6 +121,13 @@ export default function ScoreTicker() {
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const date = useMemo(() => easternDateString(), []);
+  const orderedGames = useMemo(
+    () => games
+      .map((game, originalIndex) => ({ game, originalIndex }))
+      .sort((a, b) => tickerPriority(a.game) - tickerPriority(b.game) || a.originalIndex - b.originalIndex)
+      .map(({ game }) => game),
+    [games],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -159,9 +173,9 @@ export default function ScoreTicker() {
           <div><strong>MLB Scores</strong><small>{updatedAt ? `Updated ${updatedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Live feed"}</small></div>
         </div>
 
-        {games.length ? (
+        {orderedGames.length ? (
           <div className={styles.scroller} ref={scrollerRef}>
-            {games.map((game) => {
+            {orderedGames.map((game) => {
               const preview = game.status.abstractGameState === "Preview";
               const live = game.status.abstractGameState === "Live";
               return (
