@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 10, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/solrb/OneDrive/mlb-diamond-dashboard/mlb-diamond-dashboard/app/page.tsx"],"sourcesContent":["export default function HomePage() {\r\n  return (\r\n    <section>\r\n      <h1>MLB Diamond Dashboard</h1>\r\n      <p>Your next-generation MLB scores and analytics app is running.</p>\r\n    </section>\r\n  );\r\n}"],"names":["HomePage"],"mappings":";;;;;;AAAe,SAASA;IACtB,qBACE,8OAAC;;0BACC,8OAAC;0BAAG;;;;;;0BACJ,8OAAC;0BAAE;;;;;;;;;;;;AAGT"}}]
-}
