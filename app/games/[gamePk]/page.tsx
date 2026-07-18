@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LineupCard, { type TeamBoxscore } from "./LineupCard";
 import LiveRefresh from "./LiveRefresh";
 import styles from "./game.module.css";
 
@@ -53,8 +54,8 @@ type GameFeed = {
     };
     boxscore?: {
       teams?: {
-        away?: { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
-        home?: { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
+        away?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
+        home?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
       };
     };
   };
@@ -90,6 +91,7 @@ function BaseDiamond({ first, second, third }: { first: boolean; second: boolean
       <span className={`${styles.base} ${styles.second} ${second ? styles.occupied : ""}`} />
       <span className={`${styles.base} ${styles.third} ${third ? styles.occupied : ""}`} />
       <span className={`${styles.base} ${styles.first} ${first ? styles.occupied : ""}`} />
+      <span className={`${styles.base} ${styles.homeBase}`} />
     </div>
   );
 }
@@ -98,9 +100,7 @@ function StatSummary({ title, stats, type }: { title: string; stats?: TeamStats;
   const rows = type === "batting"
     ? [["Runs", stats?.runs], ["Hits", stats?.hits], ["Home runs", stats?.homeRuns], ["Walks", stats?.baseOnBalls], ["Strikeouts", stats?.strikeOuts]]
     : [["Innings", stats?.inningsPitched], ["Hits allowed", stats?.hits], ["Runs allowed", stats?.runs], ["Walks", stats?.baseOnBalls], ["Strikeouts", stats?.strikeOuts]];
-  return (
-    <section className={styles.card}><h2>{title}</h2><dl className={styles.statList}>{rows.map(([label, value]) => <div key={String(label)}><dt>{label}</dt><dd>{value ?? "—"}</dd></div>)}</dl></section>
-  );
+  return <section className={styles.card}><h2>{title}</h2><dl className={styles.statList}>{rows.map(([label, value]) => <div key={String(label)}><dt>{label}</dt><dd>{value ?? "—"}</dd></div>)}</dl></section>;
 }
 
 function gameContext(game: GameFeed) {
@@ -123,8 +123,10 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   const currentPlay = game.liveData.plays?.currentPlay;
   const scoringPlays = allPlays.filter((play) => play.about?.isScoringPlay);
   const recentPlays = allPlays.slice(-14).reverse();
-  const awayStats = game.liveData.boxscore?.teams?.away?.teamStats;
-  const homeStats = game.liveData.boxscore?.teams?.home?.teamStats;
+  const awayBoxscore = game.liveData.boxscore?.teams?.away;
+  const homeBoxscore = game.liveData.boxscore?.teams?.home;
+  const awayStats = awayBoxscore?.teamStats;
+  const homeStats = homeBoxscore?.teamStats;
   const live = game.gameData.status.abstractGameState === "Live";
   const offense = line?.offense;
   const matchup = currentPlay?.matchup;
@@ -168,6 +170,11 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
         <h2>Line score</h2>
         {innings.length ? <div className={styles.tableScroll}><table className={styles.lineScore}><thead><tr><th>Team</th>{innings.map((inning) => <th key={inning.num}>{inning.num}</th>)}<th>R</th><th>H</th><th>E</th></tr></thead><tbody><tr><th>{away.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.away?.runs ?? "—"}</td>)}<td>{awayTotals?.runs ?? 0}</td><td>{awayTotals?.hits ?? 0}</td><td>{awayTotals?.errors ?? 0}</td></tr><tr><th>{home.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.home?.runs ?? "—"}</td>)}<td>{homeTotals?.runs ?? 0}</td><td>{homeTotals?.hits ?? 0}</td><td>{homeTotals?.errors ?? 0}</td></tr></tbody></table></div> : <p className={styles.empty}>The line score will appear when game data becomes available.</p>}
       </section>
+
+      <div className={styles.lineupGrid}>
+        <LineupCard teamName={away.name} team={awayBoxscore} />
+        <LineupCard teamName={home.name} team={homeBoxscore} />
+      </div>
 
       {(decisions?.winner || decisions?.loser || decisions?.save) && <section className={styles.decisions}><div><span>Winning pitcher</span><strong>{decisions.winner?.fullName ?? "—"}</strong></div><div><span>Losing pitcher</span><strong>{decisions.loser?.fullName ?? "—"}</strong></div><div><span>Save</span><strong>{decisions.save?.fullName ?? "—"}</strong></div></section>}
 
