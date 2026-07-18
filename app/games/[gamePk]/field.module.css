@@ -21,7 +21,7 @@
   z-index: 3;
   display: grid;
   justify-items: center;
-  gap: 2px;
+  gap: 3px;
   width: 96px;
   transform: translate(-50%, -50%);
   color: #fff;
@@ -29,44 +29,59 @@
   pointer-events: none;
 }
 
-.headshotWrap {
+.portraitGroup {
   position: relative;
   display: grid;
   place-items: center;
   width: var(--player-size, 44px);
   height: var(--player-size, 44px);
+  overflow: visible;
+}
+
+.headshotWrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
-  background: rgba(255,255,255,.15);
-  border: 2px solid rgba(255,255,255,.94);
+  background: linear-gradient(180deg, #f7f7f7 0%, #d9dde3 100%);
+  border: 3px solid rgba(255,255,255,.98);
   border-radius: 50%;
-  box-shadow: 0 5px 14px rgba(0,0,0,.48);
+  box-shadow: 0 0 0 1px rgba(8,24,40,.5), 0 6px 16px rgba(0,0,0,.5);
 }
 
 .headshotWrap img,
 .headshotPlaceholder {
+  display: block;
   width: 100%;
   height: 100%;
+}
+
+.headshotWrap img {
   object-fit: cover;
+  object-position: center top;
+  transform: scale(1.03);
 }
 
 .headshotPlaceholder {
-  display: grid;
   place-items: center;
-  color: rgba(255,255,255,.72);
+  color: #17324d;
   font-weight: 900;
 }
 
 .positionBadge {
   position: absolute;
-  right: -8px;
-  bottom: -3px;
-  z-index: 2;
+  left: -7px;
+  bottom: -4px;
+  z-index: 4;
   min-width: 25px;
-  padding: 3px 5px;
+  padding: 3px 6px;
   color: #fff;
-  background: #071421;
-  border: 1px solid rgba(255,255,255,.5);
+  background: linear-gradient(180deg, #0d3157 0%, #071c33 100%);
+  border: 1px solid rgba(255,255,255,.72);
   border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.45);
   font-size: .58rem;
   font-weight: 900;
   line-height: 1;
@@ -75,23 +90,24 @@
 .playerName {
   max-width: 94px;
   overflow: hidden;
-  padding: 3px 6px;
+  padding: 4px 7px;
   color: #fff;
-  background: rgba(4,15,27,.76);
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 6px;
+  background: rgba(4,15,27,.88);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 7px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.35);
   font-size: .66rem;
   font-weight: 900;
   line-height: 1.15;
   text-overflow: ellipsis;
   text-shadow: 0 1px 2px #000;
   white-space: nowrap;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(5px);
 }
 
-.outfielder { --player-size: 39px; }
-.infielder { --player-size: 44px; }
-.battery { --player-size: 47px; }
+.outfielder { --player-size: 43px; }
+.infielder { --player-size: 48px; }
+.battery { --player-size: 52px; }
 
 .center { left: 50%; top: 15%; }
 .left { left: 22%; top: 25%; }
@@ -113,9 +129,9 @@
     width: 82px;
   }
 
-  .outfielder { --player-size: 35px; }
-  .infielder { --player-size: 39px; }
-  .battery { --player-size: 42px; }
+  .outfielder { --player-size: 39px; }
+  .infielder { --player-size: 43px; }
+  .battery { --player-size: 47px; }
 
   .playerName {
     max-width: 80px;
@@ -132,5 +148,5 @@
   .fieldShell { min-height: 310px; }
   .fielder { width: 72px; }
   .playerName { max-width: 70px; font-size: .56rem; padding-inline: 4px; }
-  .positionBadge { right: -6px; min-width: 22px; font-size: .53rem; }
+  .positionBadge { left: -5px; min-width: 22px; font-size: .53rem; }
 }
