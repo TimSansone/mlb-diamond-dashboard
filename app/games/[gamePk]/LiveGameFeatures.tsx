@@ -32,7 +32,7 @@ type Defense = {
 };
 
 const headshot = (id?: number) => id
-  ? `https://img.mlbstatic.com/mlb-photos/image/upload/w_96,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`
+  ? `https://img.mlbstatic.com/mlb-photos/image/upload/w_160,q_auto:best,f_auto/v1/people/${id}/headshot/67/current`
   : "";
 
 function shortName(name?: string) {
@@ -169,10 +169,12 @@ function DefensiveAlignment({ defense }: { defense?: Defense }) {
           const player = defense?.[key];
           return (
             <div key={key} className={`${fieldStyles.fielder} ${positionClass} ${depthClass}`}>
-              <div className={fieldStyles.headshotWrap}>
-                {player?.id
-                  ? <img src={headshot(player.id)} alt={`${player.fullName ?? label} headshot`} width={48} height={48} />
-                  : <span className={fieldStyles.headshotPlaceholder}>{label}</span>}
+              <div className={fieldStyles.portraitGroup}>
+                <div className={fieldStyles.headshotWrap}>
+                  {player?.id
+                    ? <img src={headshot(player.id)} alt={`${player.fullName ?? label} headshot`} width={160} height={160} />
+                    : <span className={fieldStyles.headshotPlaceholder}>{label}</span>}
+                </div>
                 <span className={fieldStyles.positionBadge}>{label}</span>
               </div>
               <span className={fieldStyles.playerName}>{shortName(player?.fullName)}</span>
