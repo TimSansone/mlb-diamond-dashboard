@@ -1,0 +1,104 @@
+.band {
+  width: 100%;
+  overflow: hidden;
+  background: #071421;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.scroller {
+  display: flex;
+  gap: 8px;
+  width: min(100%, 1480px);
+  margin: 0 auto;
+  padding: 8px 14px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+
+.game {
+  display: grid;
+  grid-template-columns: auto minmax(42px, auto) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  padding: 7px 10px;
+  color: #fff;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  scroll-snap-align: start;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.game:hover {
+  background: rgba(255,255,255,.11);
+  transform: translateY(-1px);
+}
+
+.teamRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.teamRow img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.teamRow strong {
+  min-width: 16px;
+  font-size: .95rem;
+  text-align: center;
+}
+
+.status {
+  color: rgba(255,255,255,.72);
+  font-size: .66rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.loading {
+  padding: 9px 16px;
+  color: rgba(255,255,255,.7);
+  background: #071421;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  font-size: .75rem;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .scroller {
+    gap: 6px;
+    padding: 7px 10px;
+    scrollbar-width: none;
+  }
+
+  .scroller::-webkit-scrollbar {
+    display: none;
+  }
+
+  .game {
+    min-width: 136px;
+    padding: 6px 8px;
+  }
+
+  .teamRow img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .teamRow strong {
+    font-size: .88rem;
+  }
+
+  .status {
+    font-size: .6rem;
+  }
+}
