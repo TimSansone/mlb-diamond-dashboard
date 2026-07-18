@@ -176,25 +176,33 @@ export default function ScoreTicker() {
         {orderedGames.length ? (
           <div className={styles.scroller} ref={scrollerRef}>
             {orderedGames.map((game) => {
-              const preview = game.status.abstractGameState === "Preview";
-              const live = game.status.abstractGameState === "Live";
+              const state = game.status.abstractGameState;
+              const preview = state === "Preview";
+              const live = state === "Live";
+              const final = state === "Final";
+              const awayScore = game.teams.away.score ?? 0;
+              const homeScore = game.teams.home.score ?? 0;
+              const awayWinner = final && awayScore > homeScore;
+              const homeWinner = final && homeScore > awayScore;
+              const statusClass = live ? styles.livePill : final ? styles.finalPill : styles.previewPill;
+
               return (
                 <Link
                   key={game.gamePk}
-                  className={`${styles.game} ${live ? styles.liveGame : ""}`}
+                  className={`${styles.game} ${live ? styles.liveGame : ""} ${final ? styles.finalGame : ""}`}
                   href={`/games/${game.gamePk}`}
-                  aria-label={`${game.teams.away.team.name} ${game.teams.away.score ?? 0}, ${game.teams.home.team.name} ${game.teams.home.score ?? 0}, ${gameStatusLabel(game)}`}
+                  aria-label={`${game.teams.away.team.name} ${awayScore}, ${game.teams.home.team.name} ${homeScore}, ${gameStatusLabel(game)}`}
                 >
-                  <div className={styles.gameStatus}><span className={live ? styles.livePill : ""}>{gameLabel(game)}</span></div>
-                  <div className={styles.teamLine}>
-                    <img src={logo(game.teams.away.team.id)} alt="" width={26} height={26} />
+                  <div className={styles.gameStatus}><span className={statusClass}>{gameLabel(game)}</span></div>
+                  <div className={`${styles.teamLine} ${awayWinner ? styles.winner : final ? styles.loser : ""}`}>
+                    <img src={logo(game.teams.away.team.id)} alt="" width={36} height={36} />
                     <span>{teamAbbreviation(game.teams.away)}</span>
-                    <strong>{preview ? "–" : game.teams.away.score ?? 0}</strong>
+                    <strong>{preview ? "–" : awayScore}</strong>
                   </div>
-                  <div className={styles.teamLine}>
-                    <img src={logo(game.teams.home.team.id)} alt="" width={26} height={26} />
+                  <div className={`${styles.teamLine} ${homeWinner ? styles.winner : final ? styles.loser : ""}`}>
+                    <img src={logo(game.teams.home.team.id)} alt="" width={36} height={36} />
                     <span>{teamAbbreviation(game.teams.home)}</span>
-                    <strong>{preview ? "–" : game.teams.home.score ?? 0}</strong>
+                    <strong>{preview ? "–" : homeScore}</strong>
                   </div>
                 </Link>
               );
