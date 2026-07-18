@@ -12,16 +12,28 @@ export type MlbTeamSide = {
   probablePitcher?: { id: number; fullName: string };
 };
 
+export type MlbBroadcast = {
+  id?: number;
+  name: string;
+  type?: string;
+  language?: string;
+  homeAway?: "home" | "away" | string;
+};
+
 export type MlbGame = {
   gamePk: number;
   gameDate: string;
   officialDate: string;
+  gameNumber?: number;
+  doubleHeader?: string;
+  seriesDescription?: string;
   status: {
     abstractGameState: "Preview" | "Live" | "Final" | string;
     detailedState: string;
   };
   teams: { away: MlbTeamSide; home: MlbTeamSide };
   venue?: { id: number; name: string };
+  broadcasts?: MlbBroadcast[];
   linescore?: {
     currentInning?: number;
     currentInningOrdinal?: string;
