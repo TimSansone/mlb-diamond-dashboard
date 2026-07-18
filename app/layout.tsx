@@ -4,6 +4,7 @@ import ScoreTicker from "@/components/ScoreTicker";
 import "./globals.css";
 import "./design-system.css";
 import "./mobile.css";
+import "./mini-gamecenter.css";
 
 export const metadata: Metadata = {
   title: "MLB Diamond Dashboard",
