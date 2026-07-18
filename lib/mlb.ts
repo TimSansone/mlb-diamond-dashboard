@@ -95,9 +95,18 @@ export async function getAllMlbTeams(season = getCurrentSeason()): Promise<MlbTe
 
 export async function getMlbTeam(teamId: string, season = getCurrentSeason()): Promise<MlbTeam | null> {
   if (!/^\d+$/.test(teamId)) return null;
-  const params = new URLSearchParams({ season, hydrate: "division,league,venue" });
-  const data = await fetchMlb<MlbTeamsResponse>(`/teams/${teamId}?${params.toString()}`, 3600);
-  return data.teams[0] ?? null;
+
+  try {
+    const params = new URLSearchParams({ season, hydrate: "division,league,venue" });
+    const data = await fetchMlb<MlbTeamsResponse>(`/teams/${teamId}?${params.toString()}`, 3600);
+    if (data.teams[0]) return data.teams[0];
+  } catch {
+    // Some Stats API responses intermittently reject the single-team hydrated request.
+    // Fall back to the all-team endpoint, which is also used by the working team directory.
+  }
+
+  const teams = await getAllMlbTeams(season);
+  return teams.find((team) => team.id === Number(teamId)) ?? null;
 }
 
 export async function getTeamSchedule(teamId: string, startDate: string, endDate: string): Promise<MlbGame[]> {
