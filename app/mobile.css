@@ -1,0 +1,160 @@
+@media (max-width: 700px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .siteHeader {
+    gap: 12px;
+    padding: 13px 12px 10px;
+  }
+
+  .brand {
+    width: 100%;
+    font-size: 1.05rem;
+    text-align: center;
+  }
+
+  .siteHeader nav {
+    width: calc(100% + 24px);
+    margin: 0 -12px;
+    padding: 2px 12px 8px;
+    gap: 8px;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .siteHeader nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .siteHeader nav a {
+    flex: 0 0 auto;
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: .8rem;
+    scroll-snap-align: start;
+  }
+
+  main {
+    width: calc(100% - 20px);
+    padding: 18px 0 44px;
+  }
+
+  .scoreboardPage {
+    gap: 16px;
+  }
+
+  .dateNavigator {
+    gap: 10px;
+  }
+
+  .dateHeading h1 {
+    font-size: 1.55rem;
+  }
+
+  .dateButton {
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 10px;
+    font-size: .82rem;
+  }
+
+  .dateActions {
+    width: 100%;
+  }
+
+  .scoreboardSummary {
+    gap: 6px;
+    padding: 14px 15px;
+  }
+
+  .scoreboardSummary p {
+    font-size: .86rem;
+    line-height: 1.45;
+  }
+
+  .gameGrid {
+    gap: 13px;
+  }
+
+  .gameCardHeader {
+    min-height: 48px;
+    padding: 10px 12px;
+  }
+
+  .venue {
+    max-width: 48%;
+  }
+
+  .matchup {
+    padding: 6px 12px;
+  }
+
+  .teamRow {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    min-height: 64px;
+    gap: 10px;
+  }
+
+  .teamLogo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .teamInfo strong {
+    font-size: .92rem;
+  }
+
+  .teamScore {
+    font-size: 1.45rem;
+  }
+
+  .pitcherPanel > div {
+    padding: 11px 12px;
+  }
+
+  .detailCard,
+  .emptyState {
+    padding: 17px;
+  }
+
+  .tableScroll {
+    margin-right: -17px;
+    margin-left: -17px;
+    padding: 0 17px 8px;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 420px) {
+  .siteHeader nav a {
+    padding-inline: 10px;
+    font-size: .76rem;
+  }
+
+  .dateNavigator {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dateActions {
+    gap: 6px;
+  }
+
+  .dateButton {
+    font-size: .76rem;
+  }
+
+  .pitcherPanel {
+    grid-template-columns: 1fr;
+  }
+
+  .pitcherPanel > div + div {
+    border-top: 1px solid var(--border);
+  }
+}
