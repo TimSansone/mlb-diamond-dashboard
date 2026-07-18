@@ -59,7 +59,7 @@ export async function getMlbGames(date: string): Promise<MlbGame[]> {
   const params = new URLSearchParams({
     sportId: "1",
     date,
-    hydrate: "team,linescore,probablePitcher",
+    hydrate: "team,linescore,probablePitcher,broadcasts(all),venue",
   });
   const data = await fetchMlb<MlbScheduleResponse>(`/schedule?${params.toString()}`, 30);
   return data.dates?.flatMap((entry) => entry.games) ?? [];
@@ -118,7 +118,7 @@ export async function getTeamSchedule(teamId: string, startDate: string, endDate
     startDate,
     endDate,
     gameType: "R",
-    hydrate: "team,linescore,probablePitcher",
+    hydrate: "team,linescore,probablePitcher,broadcasts(all),venue",
   });
   const data = await fetchMlb<MlbScheduleResponse>(`/schedule?${params.toString()}`, 60);
   return data.dates?.flatMap((entry) => entry.games) ?? [];
