@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { MlbGame, MlbTeamSide } from "@/types/mlb";
 
 function teamLogoUrl(teamId: number): string {
@@ -37,13 +38,7 @@ function statusLabel(game: MlbGame): string {
 function TeamRow({ team, showScore }: { team: MlbTeamSide; showScore: boolean }) {
   return (
     <div className={`teamRow${team.isWinner ? " winner" : ""}`}>
-      <img
-        className="teamLogo"
-        src={teamLogoUrl(team.team.id)}
-        alt=""
-        width={44}
-        height={44}
-      />
+      <img className="teamLogo" src={teamLogoUrl(team.team.id)} alt="" width={44} height={44} />
       <div className="teamInfo">
         <strong>{team.team.name}</strong>
         <span>{recordLabel(team)}</span>
@@ -61,29 +56,32 @@ export default function GameCard({ game }: { game: MlbGame }) {
   const homePitcher = game.teams.home.probablePitcher?.fullName;
 
   return (
-    <article className="gameCard">
-      <div className="gameCardHeader">
-        <span className={`statusBadge ${game.status.abstractGameState.toLowerCase()}`}>
-          {statusLabel(game)}
-        </span>
-        <span className="venue">{game.venue?.name ?? "Venue TBD"}</span>
-      </div>
-
-      <div className="matchup">
-        <TeamRow team={game.teams.away} showScore={showScore} />
-        <TeamRow team={game.teams.home} showScore={showScore} />
-      </div>
-
-      <div className="pitcherPanel">
-        <div>
-          <span>Away starter</span>
-          <strong>{awayPitcher ?? "TBD"}</strong>
+    <Link className="gameCardLink" href={`/games/${game.gamePk}`} aria-label={`Open ${game.teams.away.team.name} at ${game.teams.home.team.name} Game Center`}>
+      <article className="gameCard">
+        <div className="gameCardHeader">
+          <span className={`statusBadge ${game.status.abstractGameState.toLowerCase()}`}>
+            {statusLabel(game)}
+          </span>
+          <span className="venue">{game.venue?.name ?? "Venue TBD"}</span>
         </div>
-        <div>
-          <span>Home starter</span>
-          <strong>{homePitcher ?? "TBD"}</strong>
+
+        <div className="matchup">
+          <TeamRow team={game.teams.away} showScore={showScore} />
+          <TeamRow team={game.teams.home} showScore={showScore} />
         </div>
-      </div>
-    </article>
+
+        <div className="pitcherPanel">
+          <div>
+            <span>Away starter</span>
+            <strong>{awayPitcher ?? "TBD"}</strong>
+          </div>
+          <div>
+            <span>Home starter</span>
+            <strong>{homePitcher ?? "TBD"}</strong>
+          </div>
+        </div>
+        <div className="openGameCenter">Open Game Center →</div>
+      </article>
+    </Link>
   );
 }
