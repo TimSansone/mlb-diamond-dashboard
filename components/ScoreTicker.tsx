@@ -89,17 +89,12 @@ export default function ScoreTicker() {
     async function loadGames() {
       try {
         const params = new URLSearchParams({
-          sportId: "1",
           date,
-          hydrate: "team,linescore",
           _: Date.now().toString(),
         });
-        const response = await fetch(`https://statsapi.mlb.com/api/v1/schedule?${params.toString()}`, {
+        const response = await fetch(`/api/scores?${params.toString()}`, {
           cache: "no-store",
-          headers: {
-            Accept: "application/json",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-          },
+          headers: { Accept: "application/json" },
         });
         if (!response.ok) throw new Error(`Ticker request failed: ${response.status}`);
         const data = await response.json() as ScheduleResponse;
@@ -121,7 +116,9 @@ export default function ScoreTicker() {
   }, [date]);
 
   if (!games.length) {
-    return failed ? null : <div className={styles.loading} aria-label="Loading today's MLB scores">Loading today&apos;s scores…</div>;
+    return failed
+      ? <div className={styles.loading} role="status">Scores temporarily unavailable</div>
+      : <div className={styles.loading} aria-label="Loading today's MLB scores">Loading today&apos;s scores…</div>;
   }
 
   return (
