@@ -42,20 +42,18 @@ function easternDateString() {
   return `${year}-${month}-${day}`;
 }
 
-function inningAbbreviation(game: TickerGame) {
-  const half = (game.linescore?.inningHalf ?? game.linescore?.inningState ?? "").toLowerCase();
-  if (half.startsWith("top")) return "TOP";
-  if (half.startsWith("bottom")) return "BOT";
-  if (half.startsWith("middle")) return "MID";
-  if (half.startsWith("end")) return "END";
-  return "LIVE";
-}
-
 function gameLabel(game: TickerGame) {
   const state = game.status.abstractGameState;
   if (state === "Live") {
     const inning = game.linescore?.currentInning ?? game.linescore?.currentInningOrdinal?.replace(/\D/g, "");
-    return inning ? `${inningAbbreviation(game)} ${inning}` : "LIVE";
+    const half = (game.linescore?.inningHalf ?? game.linescore?.inningState ?? "").toLowerCase();
+
+    if (!inning) return "LIVE";
+    if (half.startsWith("top")) return `▲ ${inning}`;
+    if (half.startsWith("bottom")) return `▼ ${inning}`;
+    if (half.startsWith("middle")) return `MID ${inning}`;
+    if (half.startsWith("end")) return `END ${inning}`;
+    return `LIVE ${inning}`;
   }
   if (state === "Final") return "FINAL";
   return new Intl.DateTimeFormat("en-US", {
@@ -63,6 +61,21 @@ function gameLabel(game: TickerGame) {
     minute: "2-digit",
     timeZone: "America/New_York",
   }).format(new Date(game.gameDate));
+}
+
+function gameStatusLabel(game: TickerGame) {
+  const state = game.status.abstractGameState;
+  if (state !== "Live") return gameLabel(game);
+
+  const inning = game.linescore?.currentInning ?? game.linescore?.currentInningOrdinal?.replace(/\D/g, "");
+  const half = (game.linescore?.inningHalf ?? game.linescore?.inningState ?? "").toLowerCase();
+
+  if (!inning) return "Live game";
+  if (half.startsWith("top")) return `Top of the ${inning}`;
+  if (half.startsWith("bottom")) return `Bottom of the ${inning}`;
+  if (half.startsWith("middle")) return `Middle of the ${inning}`;
+  if (half.startsWith("end")) return `End of the ${inning}`;
+  return `Live, inning ${inning}`;
 }
 
 export default function ScoreTicker() {
@@ -117,12 +130,12 @@ export default function ScoreTicker() {
         {games.map((game) => {
           const preview = game.status.abstractGameState === "Preview";
           return (
-            <Link key={game.gamePk} className={styles.game} href={`/games/${game.gamePk}`}>
+            <Link key={game.gamePk} className={styles.game} href={`/games/${game.gamePk}`} aria-label={`${game.teams.away.team.name} ${game.teams.away.score ?? 0}, ${game.teams.home.team.name} ${game.teams.home.score ?? 0}, ${gameStatusLabel(game)}`}>
               <div className={styles.teamRow}>
                 <img src={logo(game.teams.away.team.id)} alt={`${game.teams.away.team.name} logo`} width={24} height={24} />
                 <strong>{preview ? "–" : game.teams.away.score ?? 0}</strong>
               </div>
-              <span className={styles.status}>{gameLabel(game)}</span>
+              <span className={styles.status} aria-hidden="true">{gameLabel(game)}</span>
               <div className={styles.teamRow}>
                 <img src={logo(game.teams.home.team.id)} alt={`${game.teams.home.team.name} logo`} width={24} height={24} />
                 <strong>{preview ? "–" : game.teams.home.score ?? 0}</strong>
