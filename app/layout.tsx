@@ -16,21 +16,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <header className="siteHeader">
-          <Link className="brand" href="/">MLB Diamond Dashboard</Link>
-          <nav aria-label="Primary navigation">
-            <Link href="/">Scores</Link>
-            <Link href="/favorite">My Team</Link>
-            <Link href="/standings">Standings</Link>
-            <Link href="/leaders">Leaders</Link>
-            <Link href="/trends">Stats &amp; Trends</Link>
-            <Link href="/statcast">Statcast</Link>
-            <Link href="/players">Players</Link>
-            <Link href="/teams">Teams</Link>
-            <Link href="/schedule">Schedule</Link>
-          </nav>
-        </header>
-        <ScoreTicker />
+        <div className="stickyChrome">
+          <header className="siteHeader">
+            <Link className="brand" href="/">MLB Diamond Dashboard</Link>
+            <nav aria-label="Primary navigation">
+              <Link href="/">Scores</Link>
+              <Link href="/favorite">My Team</Link>
+              <Link href="/standings">Standings</Link>
+              <Link href="/leaders">Leaders</Link>
+              <Link href="/trends">Stats &amp; Trends</Link>
+              <Link href="/statcast">Statcast</Link>
+              <Link href="/players">Players</Link>
+              <Link href="/teams">Teams</Link>
+              <Link href="/schedule">Schedule</Link>
+            </nav>
+          </header>
+          <ScoreTicker />
+        </div>
         <main>{children}</main>
       </body>
     </html>
