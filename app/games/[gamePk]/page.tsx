@@ -98,27 +98,30 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   const allPlays = game.liveData.plays?.allPlays ?? []; const currentPlay = game.liveData.plays?.currentPlay;
   const scoringPlays = allPlays.filter((play) => play.about?.isScoringPlay);
   const latestCompletePlay = [...allPlays].reverse().find((play) => play.about?.isComplete !== false && Boolean(play.result?.description || play.result?.event));
+  const pitchPlay = currentPlay?.playEvents?.some((event) => event.details?.isPitch || event.pitchData)
+    ? currentPlay
+    : [...allPlays].reverse().find((play) => play.playEvents?.some((event) => event.details?.isPitch || event.pitchData));
   const awayBoxscore = game.liveData.boxscore?.teams?.away; const homeBoxscore = game.liveData.boxscore?.teams?.home;
   const awayStats = awayBoxscore?.teamStats; const homeStats = homeBoxscore?.teamStats;
-  const live = game.gameData.status.abstractGameState === "Live"; const offense = line?.offense; const matchup = currentPlay?.matchup; const decisions = game.liveData.decisions;
+  const live = game.gameData.status.abstractGameState === "Live"; const offense = line?.offense; const matchup = currentPlay?.matchup ?? pitchPlay?.matchup; const decisions = game.liveData.decisions;
   const batter = matchup?.batter; const pitcher = matchup?.pitcher ?? line?.defense?.pitcher;
   const batterData = playerFromBoxes(batter?.id, awayBoxscore, homeBoxscore); const pitcherData = playerFromBoxes(pitcher?.id, awayBoxscore, homeBoxscore);
   const batterStats = batterData?.stats?.batting; const pitcherStats = pitcherData?.stats?.pitching;
   const pitches = pitcherStats?.numberOfPitches ?? 0; const pitchStrikes = pitcherStats?.strikes ?? 0; const pitchBalls = Math.max(0, pitches - pitchStrikes);
   const batterAverage = batterData?.seasonStats?.batting?.avg ?? "—";
-  const currentInning = currentPlay?.about?.inning ?? innings.at(-1)?.num;
+  const currentInning = currentPlay?.about?.inning ?? pitchPlay?.about?.inning ?? innings.at(-1)?.num;
 
   return <div className={styles.page}>
     <div className={styles.topBar}><Link className={styles.back} href="/">← Back to scoreboard</Link><LiveRefresh active={live} /></div>
     <header className={`${styles.hero} ${live ? styles.liveHero : ""}`}><TeamHeader team={away} score={awayTotals?.runs} side="Away" /><div className={styles.status}><span className="eyebrow">{live ? "Live GameDay" : "Game Center"}</span><strong>{game.gameData.status.detailedState}</strong><span>{gameContext(game)}</span>{game.gameData.venue?.name && <small>{game.gameData.venue.name}</small>}</div><TeamHeader team={home} score={homeTotals?.runs} side="Home" /></header>
 
-    {(live || currentPlay) && <>
+    {(live || currentPlay || pitchPlay) && <>
       <section className={styles.livePanel}>
         <div className={styles.matchupPlayers}><PlayerFeature label="Current batter" person={batter} primary={`AVG ${batterAverage}`} secondary={batterGameLine(batterStats)} /><span className={styles.versus}>VS</span><PlayerFeature label="Current pitcher" person={pitcher} primary={`${pitches} pitches · ${pitchBalls} balls · ${pitchStrikes} strikes`} secondary={`${pitcherStats?.inningsPitched ?? "0.0"} IP · ${pitcherStats?.strikeOuts ?? 0} K · ERA ${pitcherData?.seasonStats?.pitching?.era ?? pitcherStats?.era ?? "—"}`} /></div>
         <div className={styles.liveState}><BaseDiamond first={offense?.first} second={offense?.second} third={offense?.third} /><div className={styles.counts}><span><b>{line?.balls ?? currentPlay?.count?.balls ?? 0}</b> Balls</span><span><b>{line?.strikes ?? currentPlay?.count?.strikes ?? 0}</b> Strikes</span><span><b>{line?.outs ?? currentPlay?.count?.outs ?? 0}</b> Outs</span></div></div>
         <div className={styles.latestPlay}><span className="eyebrow">Latest completed play</span><p>{latestCompletePlay?.result?.description ?? latestCompletePlay?.result?.event ?? "No completed play is available yet."}</p></div>
       </section>
-      <LiveGameFeatures playEvents={currentPlay?.playEvents} defense={line?.defense} />
+      <LiveGameFeatures playEvents={pitchPlay?.playEvents} defense={line?.defense} />
     </>}
 
     <section className={styles.card}><h2>Line score</h2>{innings.length ? <div className={styles.tableScroll}><table className={styles.lineScore}><thead><tr><th>Team</th>{innings.map((inning) => <th key={inning.num}>{inning.num}</th>)}<th>R</th><th>H</th><th>E</th></tr></thead><tbody><tr><th>{away.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.away?.runs ?? "—"}</td>)}<td>{awayTotals?.runs ?? 0}</td><td>{awayTotals?.hits ?? 0}</td><td>{awayTotals?.errors ?? 0}</td></tr><tr><th>{home.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.home?.runs ?? "—"}</td>)}<td>{homeTotals?.runs ?? 0}</td><td>{homeTotals?.hits ?? 0}</td><td>{homeTotals?.errors ?? 0}</td></tr></tbody></table></div> : <p className={styles.empty}>The line score will appear when game data becomes available.</p>}</section>
