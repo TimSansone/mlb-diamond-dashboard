@@ -2,7 +2,7 @@ import Link from "next/link";
 import styles from "./statcast.module.css";
 
 const CURRENT_SEASON = new Date().getFullYear();
-const SAVANT_URL = "https://baseballsavant.mlb.com/statcast_leaderboard";
+const SAVANT_URL = "https://baseballsavant.mlb.com/leaderboard/expected_statistics";
 
 type CsvRow = Record<string, string>;
 
@@ -73,7 +73,7 @@ function numberValue(row: CsvRow, keys: string[]) {
 }
 
 function displayName(row: CsvRow) {
-  const listedName = first(row, ["player_name", "name"]);
+  const listedName = first(row, ["player_name", "last_name, first_name", "name"]);
   if (listedName) {
     const [last, firstName] = listedName.split(",").map((value) => value.trim());
     return firstName ? `${firstName} ${last}` : listedName;
@@ -93,27 +93,27 @@ function normalizePlayer(row: CsvRow): StatcastPlayer | null {
   return {
     id,
     name,
-    team: first(row, ["team_name", "team", "team_abbrev"]) || "MLB",
-    bbe: numberValue(row, ["attempts", "batted_ball_events", "bbe"]) ?? 0,
-    launchAngle: numberValue(row, ["avg_hit_angle", "launch_angle_avg"]),
-    sweetSpot: numberValue(row, ["anglesweetspotpercent", "sweet_spot_percent"]),
-    maxExitVelocity: numberValue(row, ["max_hit_speed", "exit_velocity_max"]),
-    avgExitVelocity: numberValue(row, ["avg_hit_speed", "exit_velocity_avg"]),
+    team: first(row, ["team_name", "team", "team_abbrev", "player_team"]) || "MLB",
+    bbe: numberValue(row, ["attempts", "batted_ball_events", "bbe", "bip"]) ?? 0,
+    launchAngle: numberValue(row, ["avg_hit_angle", "launch_angle_avg", "launch_angle"]),
+    sweetSpot: numberValue(row, ["anglesweetspotpercent", "sweet_spot_percent", "sweet_spot"]),
+    maxExitVelocity: numberValue(row, ["max_hit_speed", "exit_velocity_max", "max_ev"]),
+    avgExitVelocity: numberValue(row, ["avg_hit_speed", "exit_velocity_avg", "avg_exit_velocity"]),
     hardHitRate: numberValue(row, ["ev95percent", "hard_hit_percent", "hard_hit_rate"]),
-    barrels: numberValue(row, ["barrels"]),
+    barrels: numberValue(row, ["barrels", "barrel"]),
     barrelRate: numberValue(row, ["brl_percent", "barrel_batted_rate", "barrel_percent"]),
   };
 }
 
 async function requestStatcast(type: "batter" | "pitcher", minimum: string) {
   const params = new URLSearchParams({
+    type,
     year: String(CURRENT_SEASON),
-    abs: "0",
-    player_type: type,
     position: "",
     team: "",
+    filterType: "bip",
     min: minimum,
-    sort: "6",
+    sort: "7",
     sortDir: type === "batter" ? "desc" : "asc",
     csv: "true",
   });
@@ -129,20 +129,27 @@ async function requestStatcast(type: "batter" | "pitcher", minimum: string) {
   if (!response.ok) throw new Error(`Statcast request failed with status ${response.status}`);
 
   const text = await response.text();
-  if (!text.includes("player_id")) return [];
+  const contentType = response.headers.get("content-type") ?? "";
 
-  return parseCsv(text)
+  if (contentType.includes("text/html") || text.trimStart().startsWith("<!DOCTYPE html")) {
+    throw new Error("Baseball Savant returned HTML instead of CSV.");
+  }
+
+  const rows = parseCsv(text);
+  return rows
     .map(normalizePlayer)
     .filter((player): player is StatcastPlayer => Boolean(player));
 }
 
 async function getStatcast(type: "batter" | "pitcher") {
-  const qualified = await requestStatcast(type, "q");
-  if (qualified.length) return qualified;
+  try {
+    const qualified = await requestStatcast(type, "q");
+    if (qualified.length) return qualified;
+  } catch {
+    // Try a numeric threshold below if Savant rejects the qualified filter.
+  }
 
-  // Baseball Savant occasionally changes how the qualified filter is handled.
-  // Fall back to a useful minimum BBE threshold instead of showing an empty page.
-  return requestStatcast(type, "25");
+  return requestStatcast(type, "25").catch(() => []);
 }
 
 function headshot(id: number) {
