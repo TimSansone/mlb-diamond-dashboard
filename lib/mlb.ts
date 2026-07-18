@@ -1,4 +1,8 @@
-import type { MlbGame, MlbScheduleResponse } from "@/types/mlb";
+import type {
+  MlbGame,
+  MlbScheduleResponse,
+  StandingsResponse,
+} from "@/types/mlb";
 
 const MLB_API_BASE = "https://statsapi.mlb.com/api/v1";
 
@@ -15,6 +19,10 @@ export function getEasternDateString(date = new Date()): string {
   const day = parts.find((part) => part.type === "day")?.value;
 
   return `${year}-${month}-${day}`;
+}
+
+export function getCurrentSeason(): string {
+  return getEasternDateString().slice(0, 4);
 }
 
 export function isValidDateString(value: string | undefined): value is string {
@@ -61,4 +69,27 @@ export async function getGameFeed(gamePk: string) {
   }
 
   return response.json();
+}
+
+export async function getStandings(
+  standingsType: "regularSeason" | "wildCard",
+  season = getCurrentSeason(),
+): Promise<StandingsResponse> {
+  const params = new URLSearchParams({
+    leagueId: "103,104",
+    season,
+    standingsTypes: standingsType,
+    hydrate: "team",
+  });
+
+  const response = await fetch(`${MLB_API_BASE}/standings?${params.toString()}`, {
+    next: { revalidate: 300 },
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`MLB standings request failed with status ${response.status}.`);
+  }
+
+  return (await response.json()) as StandingsResponse;
 }
