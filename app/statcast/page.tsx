@@ -2,7 +2,7 @@ import Link from "next/link";
 import styles from "./statcast.module.css";
 
 const CURRENT_SEASON = new Date().getFullYear();
-const SAVANT_URL = "https://baseballsavant.mlb.com/leaderboard/statcast";
+const SAVANT_URL = "https://baseballsavant.mlb.com/statcast_leaderboard";
 
 type CsvRow = Record<string, string>;
 
@@ -72,12 +72,21 @@ function numberValue(row: CsvRow, keys: string[]) {
   return Number.isFinite(value) ? value : null;
 }
 
-function normalizePlayer(row: CsvRow): StatcastPlayer | null {
-  const id = Number(first(row, ["player_id", "id"]));
+function displayName(row: CsvRow) {
   const listedName = first(row, ["player_name", "name"]);
+  if (listedName) {
+    const [last, firstName] = listedName.split(",").map((value) => value.trim());
+    return firstName ? `${firstName} ${last}` : listedName;
+  }
+
   const firstName = first(row, ["first_name"]);
   const lastName = first(row, ["last_name"]);
-  const name = listedName || [firstName, lastName].filter(Boolean).join(" ");
+  return [firstName, lastName].filter(Boolean).join(" ");
+}
+
+function normalizePlayer(row: CsvRow): StatcastPlayer | null {
+  const id = Number(first(row, ["player_id", "id"]));
+  const name = displayName(row);
 
   if (!Number.isFinite(id) || !name) return null;
 
@@ -96,28 +105,44 @@ function normalizePlayer(row: CsvRow): StatcastPlayer | null {
   };
 }
 
-async function getStatcast(type: "batter" | "pitcher") {
+async function requestStatcast(type: "batter" | "pitcher", minimum: string) {
   const params = new URLSearchParams({
-    type,
     year: String(CURRENT_SEASON),
+    abs: "0",
+    player_type: type,
     position: "",
     team: "",
-    min: "q",
-    sort: "exit_velocity_avg",
+    min: minimum,
+    sort: "6",
     sortDir: type === "batter" ? "desc" : "asc",
     csv: "true",
   });
 
   const response = await fetch(`${SAVANT_URL}?${params.toString()}`, {
     next: { revalidate: 1800 },
-    headers: { Accept: "text/csv,text/plain;q=0.9,*/*;q=0.8" },
+    headers: {
+      Accept: "text/csv,text/plain;q=0.9,*/*;q=0.8",
+      "User-Agent": "Mozilla/5.0 MLB Diamond Dashboard",
+    },
   });
 
   if (!response.ok) throw new Error(`Statcast request failed with status ${response.status}`);
 
-  return parseCsv(await response.text())
+  const text = await response.text();
+  if (!text.includes("player_id")) return [];
+
+  return parseCsv(text)
     .map(normalizePlayer)
     .filter((player): player is StatcastPlayer => Boolean(player));
+}
+
+async function getStatcast(type: "batter" | "pitcher") {
+  const qualified = await requestStatcast(type, "q");
+  if (qualified.length) return qualified;
+
+  // Baseball Savant occasionally changes how the qualified filter is handled.
+  // Fall back to a useful minimum BBE threshold instead of showing an empty page.
+  return requestStatcast(type, "25");
 }
 
 function headshot(id: number) {
@@ -232,7 +257,7 @@ export default async function StatcastPage() {
           <div><span className="eyebrow">Qualified batters</span><h2>Impact Contact Leaders</h2></div>
           <p>Sorted by average exit velocity.</p>
         </header>
-        {qualifiedBatters.length ? <AnalyticsTable players={qualifiedBatters} /> : <p className={styles.empty}>Qualified batter data is not yet available for {CURRENT_SEASON}.</p>}
+        {qualifiedBatters.length ? <AnalyticsTable players={qualifiedBatters} /> : <p className={styles.empty}>Statcast batter data is temporarily unavailable.</p>}
       </section>
 
       <section className={styles.section}>
@@ -240,7 +265,7 @@ export default async function StatcastPage() {
           <div><span className="eyebrow">Qualified pitchers</span><h2>Contact Management</h2></div>
           <p>Lowest average exit velocity allowed.</p>
         </header>
-        {contactManagers.length ? <AnalyticsTable players={contactManagers} pitcher /> : <p className={styles.empty}>Qualified pitcher data is not yet available for {CURRENT_SEASON}.</p>}
+        {contactManagers.length ? <AnalyticsTable players={contactManagers} pitcher /> : <p className={styles.empty}>Statcast pitcher data is temporarily unavailable.</p>}
       </section>
 
       <p className={styles.sourceNote}>Statcast data is supplied by MLB Baseball Savant and updates periodically throughout the season.</p>
