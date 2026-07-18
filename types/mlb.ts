@@ -8,14 +8,8 @@ export type MlbTeamSide = {
   score?: number;
   isWinner?: boolean;
   leagueRecord?: LeagueRecord;
-  team: {
-    id: number;
-    name: string;
-  };
-  probablePitcher?: {
-    id: number;
-    fullName: string;
-  };
+  team: { id: number; name: string };
+  probablePitcher?: { id: number; fullName: string };
 };
 
 export type MlbGame = {
@@ -26,14 +20,8 @@ export type MlbGame = {
     abstractGameState: "Preview" | "Live" | "Final" | string;
     detailedState: string;
   };
-  teams: {
-    away: MlbTeamSide;
-    home: MlbTeamSide;
-  };
-  venue?: {
-    id: number;
-    name: string;
-  };
+  teams: { away: MlbTeamSide; home: MlbTeamSide };
+  venue?: { id: number; name: string };
   linescore?: {
     currentInning?: number;
     currentInningOrdinal?: string;
@@ -44,10 +32,7 @@ export type MlbGame = {
 
 export type MlbScheduleResponse = {
   totalGames: number;
-  dates?: Array<{
-    date: string;
-    games: MlbGame[];
-  }>;
+  dates?: Array<{ date: string; games: MlbGame[] }>;
 };
 
 export type StandingsSplit = {
@@ -80,6 +65,42 @@ export type StandingsGroup = {
   teamRecords: StandingsTeamRecord[];
 };
 
-export type StandingsResponse = {
-  records: StandingsGroup[];
+export type StandingsResponse = { records: StandingsGroup[] };
+
+export type MlbTeam = {
+  id: number;
+  name: string;
+  teamName?: string;
+  abbreviation?: string;
+  locationName?: string;
+  firstYearOfPlay?: string;
+  division?: { id: number; name: string };
+  league?: { id: number; name: string };
+  venue?: { id: number; name: string };
 };
+
+export type MlbTeamsResponse = { teams: MlbTeam[] };
+
+export type RosterPerson = {
+  person: { id: number; fullName: string };
+  jerseyNumber?: string;
+  position: { abbreviation: string; name: string; type: string };
+  status?: { description?: string };
+};
+
+export type RosterResponse = { roster: RosterPerson[] };
+
+export type TeamLeader = {
+  rank: number;
+  value: string;
+  person: { id: number; fullName: string };
+  team?: { id: number; name: string };
+};
+
+export type TeamLeaderCategory = {
+  leaderCategory: string;
+  gameType?: { id: string; description: string };
+  leaders: TeamLeader[];
+};
+
+export type TeamLeadersResponse = { leagueLeaders: TeamLeaderCategory[] };
