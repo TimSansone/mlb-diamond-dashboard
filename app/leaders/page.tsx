@@ -18,6 +18,8 @@ const pitchingCategories = [
   ["saves", "Saves"],
 ] as const;
 
+type StatGroup = "hitting" | "pitching";
+
 type Leader = {
   rank: number;
   value: string;
@@ -32,9 +34,13 @@ type Category = {
 
 type LeadersResponse = { leagueLeaders?: Category[] };
 
-async function getLeaders(categories: readonly (readonly [string, string])[]) {
+async function getLeaders(
+  categories: readonly (readonly [string, string])[],
+  statGroup: StatGroup,
+) {
   const params = new URLSearchParams({
     leaderCategories: categories.map(([id]) => id).join(","),
+    statGroup,
     sportId: "1",
     gameTypes: "R",
     limit: "10",
@@ -45,7 +51,10 @@ async function getLeaders(categories: readonly (readonly [string, string])[]) {
     headers: { Accept: "application/json" },
   });
 
-  if (!response.ok) throw new Error(`MLB leaders request failed with status ${response.status}`);
+  if (!response.ok) {
+    throw new Error(`MLB ${statGroup} leaders request failed with status ${response.status}`);
+  }
+
   return ((await response.json()) as LeadersResponse).leagueLeaders ?? [];
 }
 
@@ -94,8 +103,8 @@ function Leaderboard({ title, category }: { title: string; category?: Category }
 
 export default async function LeadersPage() {
   const [batting, pitching] = await Promise.all([
-    getLeaders(battingCategories),
-    getLeaders(pitchingCategories),
+    getLeaders(battingCategories, "hitting"),
+    getLeaders(pitchingCategories, "pitching"),
   ]);
 
   const battingMap = new Map(batting.map((category) => [category.leaderCategory, category]));
