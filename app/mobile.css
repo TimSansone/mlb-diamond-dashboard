@@ -1,3 +1,7 @@
+.floatingRefresh {
+  display: none;
+}
+
 @media (max-width: 700px) {
   body {
     overflow-x: hidden;
@@ -130,6 +134,54 @@
     overscroll-behavior-inline: contain;
     scrollbar-width: thin;
   }
+
+  .floatingRefresh {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(18px, env(safe-area-inset-bottom));
+    z-index: 50;
+    display: inline-flex;
+    min-width: 52px;
+    min-height: 52px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 16px;
+    color: #fff;
+    background: var(--primary);
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 12px 30px rgba(7, 44, 85, .32);
+    cursor: pointer;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 900;
+  }
+
+  .floatingRefresh span {
+    display: inline-block;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  .floatingRefresh:active {
+    transform: translateY(1px) scale(.98);
+  }
+
+  .floatingRefresh:disabled {
+    cursor: wait;
+    opacity: .78;
+  }
+
+  .floatingRefresh.isRefreshing span {
+    animation: mobileRefreshSpin .8s linear infinite;
+  }
+}
+
+@keyframes mobileRefreshSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 420px) {
@@ -156,5 +208,21 @@
 
   .pitcherPanel > div + div {
     border-top: 1px solid var(--border);
+  }
+
+  .floatingRefresh {
+    width: 54px;
+    min-width: 54px;
+    padding: 0;
+  }
+
+  .floatingRefresh b {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
