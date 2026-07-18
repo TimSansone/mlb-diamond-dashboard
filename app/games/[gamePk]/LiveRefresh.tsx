@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./game.module.css";
 
 export default function LiveRefresh({ active }: { active: boolean }) {
   const router = useRouter();
@@ -22,13 +21,11 @@ export default function LiveRefresh({ active }: { active: boolean }) {
     const savedPosition = restorePosition.current;
     restorePosition.current = null;
 
-    // Wait for the refreshed server content and layout to settle before restoring.
+    // Wait for refreshed server content and its layout to settle.
     const firstFrame = window.requestAnimationFrame(() => {
-      const secondFrame = window.requestAnimationFrame(() => {
-        window.scrollTo({ top: savedPosition, left: 0, behavior: "instant" });
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: savedPosition, left: 0, behavior: "auto" });
       });
-
-      return () => window.cancelAnimationFrame(secondFrame);
     });
 
     return () => window.cancelAnimationFrame(firstFrame);
@@ -50,7 +47,7 @@ export default function LiveRefresh({ active }: { active: boolean }) {
       )}
       <button
         type="button"
-        className={`${styles.floatingRefresh} ${isPending ? styles.refreshing : ""}`}
+        className={`floatingRefresh ${isPending ? "isRefreshing" : ""}`}
         onClick={refresh}
         disabled={isPending}
         aria-label="Refresh game data"
