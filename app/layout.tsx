@@ -5,6 +5,7 @@ import "./globals.css";
 import "./design-system.css";
 import "./mobile.css";
 import "./mini-gamecenter.css";
+import "./sticky-chrome.css";
 
 export const metadata: Metadata = {
   title: "MLB Diamond Dashboard",
