@@ -1,0 +1,149 @@
+.standingsPage {
+  display: grid;
+  gap: 34px;
+}
+
+.pageHero {
+  padding: 30px;
+  background: linear-gradient(135deg, #ffffff, #eef4fb);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+
+.pageHero h1 {
+  margin: 6px 0 8px;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: -0.05em;
+}
+
+.pageHero p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.standingsSection {
+  display: grid;
+  gap: 18px;
+}
+
+.sectionHeading h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.standingsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.standingsCard {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.standingsCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 19px;
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.standingsCardHeader h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.standingsCardHeader span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.tableScroller {
+  overflow-x: auto;
+}
+
+.standingsTable {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.standingsTable th,
+.standingsTable td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.standingsTable th {
+  color: var(--muted);
+  background: #fbfcfe;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+.standingsTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.standingsTable tbody tr:hover {
+  background: #f8fbff;
+}
+
+.standingsTable .teamColumn {
+  width: 100%;
+  text-align: left;
+}
+
+.rankColumn {
+  color: var(--muted);
+}
+
+.standingsTeam {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.standingsTeam img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.standingsHeroSkeleton {
+  min-height: 150px;
+}
+
+.standingsSkeleton {
+  min-height: 320px;
+  padding: 22px;
+}
+
+@media (max-width: 900px) {
+  .standingsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .pageHero {
+    padding: 22px;
+  }
+
+  .standingsCardHeader {
+    padding: 15px 16px;
+  }
+}
