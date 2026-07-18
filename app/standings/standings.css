@@ -1,11 +1,15 @@
 .standingsPage {
   display: grid;
-  gap: 34px;
+  gap: 30px;
 }
 
 .pageHero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
   padding: 30px;
-  background: linear-gradient(135deg, #ffffff, #eef4fb);
+  background: linear-gradient(135deg, var(--surface), var(--surface-muted));
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: var(--shadow);
@@ -24,14 +28,109 @@
   line-height: 1.6;
 }
 
+.standingsLegend {
+  display: grid;
+  min-width: 170px;
+  gap: 8px;
+  color: var(--muted);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.standingsLegend span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.standingsLegend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legendPlayoff { background: var(--primary); }
+.legendWin { background: var(--success); }
+.legendLoss { background: var(--live); }
+
+.overviewGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.overviewCard {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.overviewCard > span {
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.overviewCard strong {
+  overflow: hidden;
+  font-size: 1.15rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.overviewCard small {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.standingsNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.standingsNav a {
+  padding: 10px 15px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 800;
+}
+
+.standingsNav a:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .standingsSection {
   display: grid;
+  gap: 18px;
+  scroll-margin-top: 100px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
   gap: 18px;
 }
 
 .sectionHeading h2 {
   margin: 4px 0 0;
   font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.sectionHeading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .84rem;
 }
 
 .standingsGrid {
@@ -59,13 +158,21 @@
 }
 
 .standingsCardHeader h2 {
-  margin: 0;
+  margin: 2px 0 0;
   font-size: 1.05rem;
 }
 
-.standingsCardHeader span {
+.standingsCardHeader > span {
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.standingsKicker {
+  color: var(--primary);
+  font-size: .66rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .tableScroller {
@@ -74,76 +181,139 @@
 
 .standingsTable {
   width: 100%;
-  min-width: 760px;
+  min-width: 850px;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
 }
 
 .standingsTable th,
 .standingsTable td {
-  padding: 11px 10px;
+  padding: 11px 9px;
   border-bottom: 1px solid var(--border);
   text-align: center;
   white-space: nowrap;
 }
 
 .standingsTable th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   color: var(--muted);
-  background: #fbfcfe;
-  font-size: 0.7rem;
+  background: var(--surface);
+  font-size: 0.68rem;
   letter-spacing: 0.05em;
 }
 
-.standingsTable tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.standingsTable tbody tr:hover {
-  background: #f8fbff;
-}
+.standingsTable tbody tr:last-child td { border-bottom: 0; }
+.standingsTable tbody tr:hover { background: var(--surface-muted); }
+.standingsTable tbody tr { transition: background 150ms ease; }
 
 .standingsTable .teamColumn {
+  position: sticky;
+  left: 0;
+  z-index: 1;
   width: 100%;
+  min-width: 190px;
+  background: var(--surface);
   text-align: left;
 }
 
+.standingsTable th.teamColumn { z-index: 3; }
+.standingsTable tbody tr:hover .teamColumn { background: var(--surface-muted); }
+.playoffRow .teamColumn { box-shadow: inset 4px 0 0 var(--primary); }
+
 .rankColumn {
   color: var(--muted);
+  font-weight: 800;
 }
 
 .standingsTeam {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .standingsTeam img {
   width: 30px;
   height: 30px;
+  flex: 0 0 auto;
   object-fit: contain;
 }
 
-.standingsHeroSkeleton {
-  min-height: 150px;
+.teamIdentity {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
 }
 
-.standingsSkeleton {
-  min-height: 320px;
-  padding: 22px;
+.teamIdentity strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.teamIdentity small {
+  width: fit-content;
+  color: var(--primary);
+  font-size: .63rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.strongCell { font-weight: 900; }
+.positiveDiff { color: var(--success); font-weight: 900; }
+.negativeDiff { color: var(--live); font-weight: 900; }
+
+.winStreak,
+.lossStreak {
+  display: inline-flex;
+  min-width: 34px;
+  justify-content: center;
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-weight: 900;
+}
+
+.winStreak { color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.lossStreak { color: var(--live); background: color-mix(in srgb, var(--live) 12%, transparent); }
+
+.standingsNotice {
+  margin: 0;
+  padding: 24px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.standingsHeroSkeleton { min-height: 150px; }
+.standingsSkeleton { min-height: 320px; padding: 22px; }
+
+@media (max-width: 1100px) {
+  .overviewGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
-  .standingsGrid {
-    grid-template-columns: 1fr;
-  }
+  .pageHero { align-items: flex-start; flex-direction: column; }
+  .standingsLegend { grid-template-columns: repeat(3, auto); min-width: 0; }
+  .standingsGrid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 700px) {
-  .pageHero {
-    padding: 22px;
-  }
+  .pageHero { padding: 22px; }
+  .sectionHeading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .standingsCardHeader { padding: 15px 16px; }
+  .standingsTable { min-width: 760px; }
+  .standingsTable th,
+  .standingsTable td { padding: 10px 8px; }
+  .standingsTable .teamColumn { min-width: 170px; }
+}
 
-  .standingsCardHeader {
-    padding: 15px 16px;
-  }
+@media (max-width: 520px) {
+  .overviewGrid { grid-template-columns: 1fr; }
+  .standingsLegend { grid-template-columns: 1fr; }
+  .standingsNav { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .standingsNav a { text-align: center; }
 }
