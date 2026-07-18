@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTeamStanding } from "@/lib/mlb";
 import BoxScoreTables from "./BoxScoreTables";
 import InningPlayByPlay from "./InningPlayByPlay";
 import LineupCard, { type TeamBoxscore } from "./LineupCard";
@@ -9,6 +10,7 @@ import styles from "./game.module.css";
 
 type TeamStats = Record<string, number | string>;
 type Side = { id: number; name: string };
+type TeamRecord = { wins: number; losses: number } | null;
 type Person = { id?: number; fullName?: string };
 type BattingStats = { atBats?: number; runs?: number; hits?: number; rbi?: number; baseOnBalls?: number; strikeOuts?: number; homeRuns?: number; doubles?: number; triples?: number; avg?: string };
 type PitchingStats = { numberOfPitches?: number; strikes?: number; inningsPitched?: string; strikeOuts?: number; era?: string };
@@ -53,8 +55,8 @@ async function getGame(gamePk: string): Promise<GameFeed> {
   return response.json();
 }
 
-function TeamHeader({ team, score, side }: { team: Side; score?: number; side: string }) {
-  return <div className={styles.team}><img src={logo(team.id)} alt={`${team.name} logo`} width={72} height={72} /><Link className={styles.teamName} href={`/teams/${team.id}`}><span>{side}</span><strong>{team.name}</strong></Link><span className={styles.score}>{score ?? 0}</span></div>;
+function TeamHeader({ team, score, side, record }: { team: Side; score?: number; side: string; record: TeamRecord }) {
+  return <div className={styles.team}><img src={logo(team.id)} alt={`${team.name} logo`} width={72} height={72} /><Link className={styles.teamName} href={`/teams/${team.id}`}><span>{side}</span><strong>{team.name}</strong><small>{record ? `${record.wins}-${record.losses}` : "Record unavailable"}</small></Link><span className={styles.score}>{score ?? 0}</span></div>;
 }
 
 function BaseDiamond({ first, second, third }: { first?: Person; second?: Person; third?: Person }) {
@@ -93,6 +95,10 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   if (!/^\d+$/.test(gamePk)) notFound();
   const game = await getGame(gamePk);
   const { away, home } = game.gameData.teams;
+  const [awayRecord, homeRecord] = await Promise.all([
+    getTeamStanding(away.id).catch(() => null),
+    getTeamStanding(home.id).catch(() => null),
+  ]);
   const line = game.liveData.linescore;
   const awayTotals = line?.teams?.away; const homeTotals = line?.teams?.home; const innings = line?.innings ?? [];
   const allPlays = game.liveData.plays?.allPlays ?? []; const currentPlay = game.liveData.plays?.currentPlay;
@@ -113,7 +119,7 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
 
   return <div className={styles.page}>
     <div className={styles.topBar}><Link className={styles.back} href="/">← Back to scoreboard</Link><LiveRefresh active={live} /></div>
-    <header className={`${styles.hero} ${live ? styles.liveHero : ""}`}><TeamHeader team={away} score={awayTotals?.runs} side="Away" /><div className={styles.status}><span className="eyebrow">{live ? "Live GameDay" : "Game Center"}</span><strong>{game.gameData.status.detailedState}</strong><span>{gameContext(game)}</span>{game.gameData.venue?.name && <small>{game.gameData.venue.name}</small>}</div><TeamHeader team={home} score={homeTotals?.runs} side="Home" /></header>
+    <header className={`${styles.hero} ${live ? styles.liveHero : ""}`}><TeamHeader team={away} score={awayTotals?.runs} side="Away" record={awayRecord} /><div className={styles.status}><span className="eyebrow">{live ? "Live GameDay" : "Game Center"}</span><strong>{game.gameData.status.detailedState}</strong><span>{gameContext(game)}</span>{game.gameData.venue?.name && <small>{game.gameData.venue.name}</small>}</div><TeamHeader team={home} score={homeTotals?.runs} side="Home" record={homeRecord} /></header>
 
     {(live || currentPlay || pitchPlay) && <>
       <section className={styles.livePanel}>
