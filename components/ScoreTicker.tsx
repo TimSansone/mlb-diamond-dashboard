@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ScoreTicker.module.css";
 
 type TickerSide = {
   score?: number;
-  team: { id: number; name: string };
+  team: { id: number; name: string; abbreviation?: string };
 };
 
 type TickerGame = {
@@ -28,18 +28,25 @@ type ScheduleResponse = {
 
 const logo = (teamId: number) => `https://www.mlbstatic.com/team-logos/${teamId}.svg`;
 
-function easternDateString() {
+function easternDateString(date = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(new Date());
+  }).formatToParts(date);
 
   const year = parts.find((part) => part.type === "year")?.value;
   const month = parts.find((part) => part.type === "month")?.value;
   const day = parts.find((part) => part.type === "day")?.value;
   return `${year}-${month}-${day}`;
+}
+
+function teamAbbreviation(side: TickerSide) {
+  if (side.team.abbreviation) return side.team.abbreviation;
+  const words = side.team.name.replace(/[^A-Za-z ]/g, "").split(/\s+/).filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
+  return words.slice(-2).map((word) => word[0]).join("").toUpperCase();
 }
 
 function gameLabel(game: TickerGame) {
@@ -71,35 +78,52 @@ function gameStatusLabel(game: TickerGame) {
   const half = (game.linescore?.inningHalf ?? game.linescore?.inningState ?? "").toLowerCase();
 
   if (!inning) return "Live game";
-  if (half.startsWith("top")) return `Top of the ${inning}`;
-  if (half.startsWith("bottom")) return `Bottom of the ${inning}`;
-  if (half.startsWith("middle")) return `Middle of the ${inning}`;
-  if (half.startsWith("end")) return `End of the ${inning}`;
+  if (half.startsWith("top")) return `Top of inning ${inning}`;
+  if (half.startsWith("bottom")) return `Bottom of inning ${inning}`;
+  if (half.startsWith("middle")) return `Middle of inning ${inning}`;
+  if (half.startsWith("end")) return `End of inning ${inning}`;
   return `Live, inning ${inning}`;
+}
+
+async function requestScores(date: string): Promise<ScheduleResponse> {
+  const stamp = Date.now().toString();
+  const internal = await fetch(`/api/scores?date=${date}&_=${stamp}`, {
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  }).catch(() => null);
+
+  if (internal?.ok) return internal.json() as Promise<ScheduleResponse>;
+
+  const params = new URLSearchParams({
+    sportId: "1",
+    date,
+    hydrate: "team,linescore",
+    _: stamp,
+  });
+  const fallback = await fetch(`https://statsapi.mlb.com/api/v1/schedule?${params.toString()}`, {
+    cache: "no-store",
+    headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+  });
+  if (!fallback.ok) throw new Error(`Scores request failed: ${fallback.status}`);
+  return fallback.json() as Promise<ScheduleResponse>;
 }
 
 export default function ScoreTicker() {
   const [games, setGames] = useState<TickerGame[]>([]);
   const [failed, setFailed] = useState(false);
-  const date = useMemo(easternDateString, []);
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const date = useMemo(() => easternDateString(), []);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadGames() {
       try {
-        const params = new URLSearchParams({
-          date,
-          _: Date.now().toString(),
-        });
-        const response = await fetch(`/api/scores?${params.toString()}`, {
-          cache: "no-store",
-          headers: { Accept: "application/json" },
-        });
-        if (!response.ok) throw new Error(`Ticker request failed: ${response.status}`);
-        const data = await response.json() as ScheduleResponse;
+        const data = await requestScores(date);
         if (mounted) {
           setGames(data.dates?.flatMap((entry) => entry.games) ?? []);
+          setUpdatedAt(new Date());
           setFailed(false);
         }
       } catch {
@@ -115,31 +139,58 @@ export default function ScoreTicker() {
     };
   }, [date]);
 
-  if (!games.length) {
-    return failed
-      ? <div className={styles.loading} role="status">Scores temporarily unavailable</div>
-      : <div className={styles.loading} aria-label="Loading today's MLB scores">Loading today&apos;s scores…</div>;
-  }
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      scroller.scrollLeft += event.deltaY;
+      event.preventDefault();
+    };
+    scroller.addEventListener("wheel", onWheel, { passive: false });
+    return () => scroller.removeEventListener("wheel", onWheel);
+  }, []);
 
   return (
     <aside className={styles.band} aria-label="Today's MLB scores">
-      <div className={styles.scroller}>
-        {games.map((game) => {
-          const preview = game.status.abstractGameState === "Preview";
-          return (
-            <Link key={game.gamePk} className={styles.game} href={`/games/${game.gamePk}`} aria-label={`${game.teams.away.team.name} ${game.teams.away.score ?? 0}, ${game.teams.home.team.name} ${game.teams.home.score ?? 0}, ${gameStatusLabel(game)}`}>
-              <div className={styles.teamRow}>
-                <img src={logo(game.teams.away.team.id)} alt={`${game.teams.away.team.name} logo`} width={24} height={24} />
-                <strong>{preview ? "–" : game.teams.away.score ?? 0}</strong>
-              </div>
-              <span className={styles.status} aria-hidden="true">{gameLabel(game)}</span>
-              <div className={styles.teamRow}>
-                <img src={logo(game.teams.home.team.id)} alt={`${game.teams.home.team.name} logo`} width={24} height={24} />
-                <strong>{preview ? "–" : game.teams.home.score ?? 0}</strong>
-              </div>
-            </Link>
-          );
-        })}
+      <div className={styles.bandInner}>
+        <div className={styles.labelBlock}>
+          <span className={styles.liveDot} aria-hidden="true" />
+          <div><strong>MLB Scores</strong><small>{updatedAt ? `Updated ${updatedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Live feed"}</small></div>
+        </div>
+
+        {games.length ? (
+          <div className={styles.scroller} ref={scrollerRef}>
+            {games.map((game) => {
+              const preview = game.status.abstractGameState === "Preview";
+              const live = game.status.abstractGameState === "Live";
+              return (
+                <Link
+                  key={game.gamePk}
+                  className={`${styles.game} ${live ? styles.liveGame : ""}`}
+                  href={`/games/${game.gamePk}`}
+                  aria-label={`${game.teams.away.team.name} ${game.teams.away.score ?? 0}, ${game.teams.home.team.name} ${game.teams.home.score ?? 0}, ${gameStatusLabel(game)}`}
+                >
+                  <div className={styles.gameStatus}><span className={live ? styles.livePill : ""}>{gameLabel(game)}</span></div>
+                  <div className={styles.teamLine}>
+                    <img src={logo(game.teams.away.team.id)} alt="" width={26} height={26} />
+                    <span>{teamAbbreviation(game.teams.away)}</span>
+                    <strong>{preview ? "–" : game.teams.away.score ?? 0}</strong>
+                  </div>
+                  <div className={styles.teamLine}>
+                    <img src={logo(game.teams.home.team.id)} alt="" width={26} height={26} />
+                    <span>{teamAbbreviation(game.teams.home)}</span>
+                    <strong>{preview ? "–" : game.teams.home.score ?? 0}</strong>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className={styles.loading} role="status">
+            {failed ? "Scores temporarily unavailable" : "Loading today's scores…"}
+          </div>
+        )}
       </div>
     </aside>
   );
