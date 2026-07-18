@@ -5,10 +5,10 @@
 
 .miniGameCenter {
   display: grid;
-  gap: 12px;
+  gap: 11px;
   padding: 14px 16px;
   color: #fff;
-  background: linear-gradient(135deg, #0a2647, #123f6f);
+  background: linear-gradient(135deg, #091f3b, #123f6f);
   border-top: 1px solid rgba(255,255,255,.12);
 }
 
@@ -68,29 +68,59 @@
   clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
 }
 
-.miniCount {
+.miniGameState {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   overflow: hidden;
   background: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 10px;
 }
 
-.miniCount span {
+.miniCount,
+.miniOutBlock {
   display: grid;
-  justify-items: center;
-  gap: 2px;
-  padding: 9px 5px;
-  color: rgba(255,255,255,.7);
+  place-items: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 8px;
+}
+
+.miniCount {
   border-right: 1px solid rgba(255,255,255,.12);
-  font-size: .62rem;
-  font-weight: 800;
+}
+
+.miniCount strong {
+  font-size: 1.15rem;
+}
+
+.miniCount span,
+.miniOutBlock > span {
+  color: rgba(255,255,255,.62);
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .06em;
   text-transform: uppercase;
 }
 
-.miniCount span:last-child { border-right: 0; }
-.miniCount b { color: #fff; font-size: 1rem; }
+.miniOuts {
+  display: flex;
+  gap: 5px;
+}
+
+.miniOuts span {
+  width: 9px;
+  height: 9px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.55);
+  border-radius: 50%;
+}
+
+.miniOuts span.recorded {
+  background: #f5c542;
+  border-color: #fff4b5;
+  box-shadow: 0 0 8px rgba(245,197,66,.42);
+}
 
 .miniMatchup {
   display: grid;
@@ -98,26 +128,63 @@
   gap: 8px;
 }
 
-.miniMatchup > div {
+.miniPlayer {
   display: grid;
+  grid-template-columns: 38px minmax(0,1fr);
+  align-items: center;
+  gap: 8px;
   min-width: 0;
-  gap: 3px;
-  padding: 9px 10px;
+  padding: 7px 8px;
   background: rgba(0,0,0,.16);
+  border: 1px solid rgba(255,255,255,.08);
   border-radius: 9px;
 }
 
-.miniMatchup span {
+.miniPlayer img,
+.miniPlayerPlaceholder {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 18%;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.65);
+}
+
+.miniPlayer > div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.miniPlayer span,
+.miniLastPitch span {
   color: rgba(255,255,255,.62);
-  font-size: .62rem;
+  font-size: .58rem;
   font-weight: 900;
   letter-spacing: .05em;
   text-transform: uppercase;
 }
 
-.miniMatchup strong {
+.miniPlayer strong {
   overflow: hidden;
-  font-size: .78rem;
+  font-size: .74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.miniLastPitch {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,.15);
+  border-left: 3px solid #f5c542;
+  border-radius: 7px;
+}
+
+.miniLastPitch strong {
+  overflow: hidden;
+  font-size: .7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -127,5 +194,7 @@
   .miniSituationTop { grid-template-columns: 72px minmax(0, 1fr); gap: 10px; }
   .miniDiamond { transform: scale(.9); }
   .miniMatchup { grid-template-columns: 1fr; }
-  .miniCount span { padding-inline: 3px; font-size: .57rem; }
+  .miniPlayer { grid-template-columns: 34px minmax(0,1fr); }
+  .miniPlayer img,
+  .miniPlayerPlaceholder { width: 34px; height: 34px; }
 }
