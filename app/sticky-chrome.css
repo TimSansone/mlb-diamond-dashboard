@@ -1,0 +1,21 @@
+.stickyChrome {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  isolation: isolate;
+  box-shadow: 0 10px 24px rgba(13, 29, 49, 0.08);
+}
+
+.stickyChrome .siteHeader {
+  position: relative;
+  top: auto;
+  z-index: auto;
+  box-shadow: none;
+}
+
+@media (max-width: 700px) {
+  .stickyChrome {
+    position: sticky;
+    top: 0;
+  }
+}
