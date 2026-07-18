@@ -35,9 +35,7 @@ export async function getMlbGames(date: string): Promise<MlbGame[]> {
 
   const response = await fetch(`${MLB_API_BASE}/schedule?${params.toString()}`, {
     next: { revalidate: 30 },
-    headers: {
-      Accept: "application/json",
-    },
+    headers: { Accept: "application/json" },
   });
 
   if (!response.ok) {
@@ -46,4 +44,21 @@ export async function getMlbGames(date: string): Promise<MlbGame[]> {
 
   const data = (await response.json()) as MlbScheduleResponse;
   return data.dates?.flatMap((entry) => entry.games) ?? [];
+}
+
+export async function getGameFeed(gamePk: string) {
+  if (!/^\d+$/.test(gamePk)) {
+    throw new Error("Invalid MLB game identifier.");
+  }
+
+  const response = await fetch(`https://statsapi.mlb.com/api/v1.1/game/${gamePk}/feed/live`, {
+    next: { revalidate: 15 },
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`MLB game feed request failed with status ${response.status}.`);
+  }
+
+  return response.json();
 }
