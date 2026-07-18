@@ -3,6 +3,7 @@ import DateNavigator from "@/components/DateNavigator";
 import GameCard from "@/components/GameCard";
 import ScoreboardAutoRefresh from "@/components/ScoreboardAutoRefresh";
 import { getBaseballCentral } from "@/lib/baseball-central";
+import { getFreshMlbGames } from "@/lib/live-scores";
 import { getEasternDateString, getMlbGames, isValidDateString } from "@/lib/mlb";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const today = getEasternDateString();
   const selectedDate = isValidDateString(params.date) ? params.date : today;
   const isToday = selectedDate === today;
-  const games = await getMlbGames(selectedDate);
+  const games = isToday ? await getFreshMlbGames(selectedDate) : await getMlbGames(selectedDate);
   const central = await getBaseballCentral(games);
 
   return (
