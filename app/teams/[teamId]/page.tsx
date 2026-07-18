@@ -86,19 +86,21 @@ function Roster({ players }: { players: RosterPerson[] }) {
 
   return (
     <section className={styles.card}>
-      <div className={styles.cardHeader}><h2>Active Roster</h2><span>{players.length} players</span></div>
-      <div className={styles.rosterSection}>
-        {Object.entries(groups).map(([group, groupPlayers]) => (
-          <div className={styles.rosterGroup} key={group}>
-            <h3>{group}</h3>
-            <ul className={styles.rosterList}>
-              {groupPlayers.map((player) => (
-                <li key={player.person.id}><span>#{player.jerseyNumber ?? "—"}</span><strong>{player.person.fullName}</strong><span>{player.position.abbreviation}</span></li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+      <div className={styles.cardHeader}><h2>Active Roster</h2><span>{players.length ? `${players.length} players` : "Roster"}</span></div>
+      {players.length ? (
+        <div className={styles.rosterSection}>
+          {Object.entries(groups).map(([group, groupPlayers]) => (
+            <div className={styles.rosterGroup} key={group}>
+              <h3>{group}</h3>
+              <ul className={styles.rosterList}>
+                {groupPlayers.map((player) => (
+                  <li key={player.person.id}><span>#{player.jerseyNumber ?? "—"}</span><strong>{player.person.fullName}</strong><span>{player.position.abbreviation}</span></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : <p className={styles.empty}>Roster data is temporarily unavailable.</p>}
     </section>
   );
 }
@@ -112,12 +114,17 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
   const team = await getMlbTeam(teamId, season);
   if (!team) notFound();
 
-  const [standing, games, roster, leaders] = await Promise.all([
-    getTeamStanding(team.id, season).catch(() => null),
-    getTeamSchedule(teamId, shiftDate(today, -14), shiftDate(today, 21)).catch(() => []),
-    getTeamRoster(teamId, season).catch(() => []),
-    getTeamLeaders(teamId, season).catch(() => []),
+  const [standingResult, gamesResult, rosterResult, leadersResult] = await Promise.allSettled([
+    getTeamStanding(team.id, season),
+    getTeamSchedule(teamId, shiftDate(today, -21), shiftDate(today, 28)),
+    getTeamRoster(teamId, season),
+    getTeamLeaders(teamId, season),
   ]);
+
+  const standing = standingResult.status === "fulfilled" ? standingResult.value : null;
+  const games = gamesResult.status === "fulfilled" ? gamesResult.value : [];
+  const roster = rosterResult.status === "fulfilled" ? rosterResult.value : [];
+  const leaders = leadersResult.status === "fulfilled" ? leadersResult.value : [];
 
   const recent = games.filter((game) => game.status.abstractGameState === "Final").slice(-5).reverse();
   const upcoming = games.filter((game) => game.status.abstractGameState !== "Final" && new Date(game.gameDate) >= new Date()).slice(0, 5);
@@ -140,11 +147,16 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
       </header>
 
       <div className={styles.grid}>
-        <section className={styles.card}><div className={styles.cardHeader}><h2>Recent Results</h2><span>Last 5</span></div><GameList games={recent} teamId={team.id} emptyText="No recent games are available." /></section>
-        <section className={styles.card}><div className={styles.cardHeader}><h2>Upcoming Games</h2><span>Next 5</span></div><GameList games={upcoming} teamId={team.id} emptyText="No upcoming games are scheduled in this window." /></section>
+        <section className={styles.card}><div className={styles.cardHeader}><h2>Recent Results</h2><span>Last 5</span></div><GameList games={recent} teamId={team.id} emptyText="Recent game data is temporarily unavailable." /></section>
+        <section className={styles.card}><div className={styles.cardHeader}><h2>Upcoming Games</h2><span>Next 5</span></div><GameList games={upcoming} teamId={team.id} emptyText="No upcoming games are currently available." /></section>
       </div>
 
-      {leaders.length ? <div className={styles.leaders}>{leaders.map((category) => <LeaderCard key={category.leaderCategory} category={category} />)}</div> : null}
+      {leaders.length ? (
+        <div className={styles.leaders}>{leaders.map((category) => <LeaderCard key={category.leaderCategory} category={category} />)}</div>
+      ) : (
+        <section className={styles.card}><div className={styles.cardHeader}><h2>Team Leaders</h2></div><p className={styles.empty}>Team leader data is temporarily unavailable.</p></section>
+      )}
+
       <Roster players={roster} />
     </div>
   );
