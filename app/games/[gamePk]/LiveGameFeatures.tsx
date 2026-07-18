@@ -1,4 +1,5 @@
 import styles from "./game.module.css";
+import fieldStyles from "./field.module.css";
 
 type Person = { id?: number; fullName?: string };
 
@@ -94,23 +95,87 @@ function PitchTracker({ pitches }: { pitches: PitchEvent[] }) {
   );
 }
 
-const positions: Array<[keyof Defense, string, string]> = [
-  ["center", "CF", styles.fielderCenter], ["left", "LF", styles.fielderLeft], ["right", "RF", styles.fielderRight],
-  ["shortstop", "SS", styles.fielderShort], ["second", "2B", styles.fielderSecond], ["third", "3B", styles.fielderThird],
-  ["first", "1B", styles.fielderFirst], ["pitcher", "P", styles.fielderPitcher], ["catcher", "C", styles.fielderCatcher],
+const positions: Array<[keyof Defense, string, string, string]> = [
+  ["center", "CF", fieldStyles.center, fieldStyles.outfielder],
+  ["left", "LF", fieldStyles.left, fieldStyles.outfielder],
+  ["right", "RF", fieldStyles.right, fieldStyles.outfielder],
+  ["shortstop", "SS", fieldStyles.shortstop, fieldStyles.infielder],
+  ["second", "2B", fieldStyles.second, fieldStyles.infielder],
+  ["third", "3B", fieldStyles.third, fieldStyles.infielder],
+  ["first", "1B", fieldStyles.first, fieldStyles.infielder],
+  ["pitcher", "P", fieldStyles.pitcher, fieldStyles.battery],
+  ["catcher", "C", fieldStyles.catcher, fieldStyles.battery],
 ];
+
+function BaseballField() {
+  return (
+    <svg className={fieldStyles.fieldSvg} viewBox="0 0 700 520" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="fieldSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#132943" />
+          <stop offset="1" stopColor="#071421" />
+        </linearGradient>
+        <radialGradient id="outfieldGrass" cx="50%" cy="84%" r="78%">
+          <stop offset="0" stopColor="#3f7c43" />
+          <stop offset=".72" stopColor="#285f35" />
+          <stop offset="1" stopColor="#1b4729" />
+        </radialGradient>
+        <pattern id="mowPattern" width="72" height="72" patternUnits="userSpaceOnUse" patternTransform="rotate(10)">
+          <rect width="36" height="72" fill="rgba(255,255,255,.035)" />
+          <rect x="36" width="36" height="72" fill="rgba(0,0,0,.035)" />
+        </pattern>
+        <filter id="fieldShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="7" stdDeviation="8" floodColor="#000" floodOpacity=".42" />
+        </filter>
+      </defs>
+
+      <rect width="700" height="520" fill="url(#fieldSky)" />
+      <path d="M38 84 Q350 8 662 84 L700 142 Q350 52 0 142 Z" fill="#0a1a2a" stroke="#31506a" strokeWidth="3" />
+      <path d="M18 118 Q350 30 682 118 L650 398 Q350 505 50 398 Z" fill="url(#outfieldGrass)" filter="url(#fieldShadow)" />
+      <path d="M18 118 Q350 30 682 118 L650 398 Q350 505 50 398 Z" fill="url(#mowPattern)" opacity=".9" />
+
+      <path d="M350 458 L92 210 Q350 82 608 210 Z" fill="#b48752" opacity=".96" />
+      <path d="M350 436 L130 220 Q350 118 570 220 Z" fill="#3b7440" />
+      <path d="M350 436 L130 220 Q350 118 570 220 Z" fill="url(#mowPattern)" opacity=".55" />
+
+      <path d="M350 437 L210 302 L350 214 L490 302 Z" fill="#b48752" stroke="#d5b078" strokeWidth="2" />
+      <circle cx="350" cy="337" r="31" fill="#b48752" stroke="#d5b078" strokeWidth="2" />
+      <ellipse cx="350" cy="337" rx="13" ry="5" fill="#ead8b0" />
+
+      <line x1="350" y1="457" x2="91" y2="210" stroke="#f5f2df" strokeWidth="3" />
+      <line x1="350" y1="457" x2="609" y2="210" stroke="#f5f2df" strokeWidth="3" />
+
+      <g fill="#f7f2dd" stroke="#d8d1b7" strokeWidth="1.5">
+        <rect x="341" y="424" width="18" height="18" transform="rotate(45 350 433)" />
+        <rect x="462" y="291" width="17" height="17" transform="rotate(45 470.5 299.5)" />
+        <rect x="341.5" y="206" width="17" height="17" transform="rotate(45 350 214.5)" />
+        <rect x="222" y="291" width="17" height="17" transform="rotate(45 230.5 299.5)" />
+      </g>
+
+      <path d="M335 455 L350 468 L365 455 L360 444 L340 444 Z" fill="#f7f2dd" stroke="#d8d1b7" strokeWidth="1.5" />
+      <path d="M68 393 Q350 508 632 393" fill="none" stroke="#9b6b3d" strokeWidth="18" opacity=".72" />
+      <path d="M52 397 Q350 522 648 397" fill="none" stroke="#d2a66f" strokeWidth="3" opacity=".65" />
+    </svg>
+  );
+}
 
 function DefensiveAlignment({ defense }: { defense?: Defense }) {
   return (
     <section className={`${styles.card} ${styles.featureCard}`}>
       <div className={styles.featureHeader}><span>Defensive alignment</span><small>On the field</small></div>
-      <div className={styles.fieldGraphic}>
-        {positions.map(([key, label, className]) => {
+      <div className={fieldStyles.fieldShell}>
+        <BaseballField />
+        {positions.map(([key, label, positionClass, depthClass]) => {
           const player = defense?.[key];
           return (
-            <div key={key} className={`${styles.fielder} ${className}`}>
-              {player?.id ? <img src={headshot(player.id)} alt="" width={38} height={38} /> : <span />}
-              <b>{label}</b><small>{shortName(player?.fullName)}</small>
+            <div key={key} className={`${fieldStyles.fielder} ${positionClass} ${depthClass}`}>
+              <div className={fieldStyles.headshotWrap}>
+                {player?.id
+                  ? <img src={headshot(player.id)} alt={`${player.fullName ?? label} headshot`} width={48} height={48} />
+                  : <span className={fieldStyles.headshotPlaceholder}>{label}</span>}
+                <span className={fieldStyles.positionBadge}>{label}</span>
+              </div>
+              <span className={fieldStyles.playerName}>{shortName(player?.fullName)}</span>
             </div>
           );
         })}
