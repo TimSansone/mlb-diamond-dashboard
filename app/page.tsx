@@ -3,6 +3,7 @@ import DateNavigator from "@/components/DateNavigator";
 import GameCard from "@/components/GameCard";
 import ScoreboardAutoRefresh from "@/components/ScoreboardAutoRefresh";
 import { getBaseballCentral } from "@/lib/baseball-central";
+import { getLiveGameSituations } from "@/lib/live-situations";
 import { getFreshMlbGames } from "@/lib/live-scores";
 import { getEasternDateString, getMlbGames, isValidDateString } from "@/lib/mlb";
 
@@ -19,7 +20,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const selectedDate = isValidDateString(params.date) ? params.date : today;
   const isToday = selectedDate === today;
   const games = isToday ? await getFreshMlbGames(selectedDate) : await getMlbGames(selectedDate);
-  const central = await getBaseballCentral(games);
+  const liveGamePks = games
+    .filter((game) => game.status.abstractGameState === "Live")
+    .map((game) => game.gamePk);
+  const [central, liveSituations] = await Promise.all([
+    getBaseballCentral(games),
+    getLiveGameSituations(liveGamePks),
+  ]);
 
   return (
     <section className="scoreboardPage">
@@ -37,7 +44,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       {games.length > 0 ? (
         <div className="gameGrid">
           {games.map((game) => (
-            <GameCard key={game.gamePk} game={game} />
+            <GameCard key={game.gamePk} game={game} situation={liveSituations[game.gamePk]} />
           ))}
         </div>
       ) : (
