@@ -6,6 +6,7 @@ import type {
   RosterResponse,
   StandingsResponse,
   StandingsTeamRecord,
+  TeamLeaderCategory,
   TeamLeadersResponse,
 } from "@/types/mlb";
 
@@ -18,7 +19,7 @@ async function fetchMlb<T>(path: string, revalidate = 300): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`MLB request failed with status ${response.status}.`);
+    throw new Error(`MLB request failed with status ${response.status} for ${path}.`);
   }
 
   return (await response.json()) as T;
@@ -101,8 +102,7 @@ export async function getMlbTeam(teamId: string, season = getCurrentSeason()): P
     const data = await fetchMlb<MlbTeamsResponse>(`/teams/${teamId}?${params.toString()}`, 3600);
     if (data.teams[0]) return data.teams[0];
   } catch {
-    // Some Stats API responses intermittently reject the single-team hydrated request.
-    // Fall back to the all-team endpoint, which is also used by the working team directory.
+    // Fall through to the complete team directory, which is generally more reliable.
   }
 
   const teams = await getAllMlbTeams(season);
@@ -110,11 +110,14 @@ export async function getMlbTeam(teamId: string, season = getCurrentSeason()): P
 }
 
 export async function getTeamSchedule(teamId: string, startDate: string, endDate: string): Promise<MlbGame[]> {
+  if (!/^\d+$/.test(teamId)) return [];
+
   const params = new URLSearchParams({
     sportId: "1",
     teamId,
     startDate,
     endDate,
+    gameType: "R",
     hydrate: "team,linescore,probablePitcher",
   });
   const data = await fetchMlb<MlbScheduleResponse>(`/schedule?${params.toString()}`, 60);
@@ -122,20 +125,51 @@ export async function getTeamSchedule(teamId: string, startDate: string, endDate
 }
 
 export async function getTeamRoster(teamId: string, season = getCurrentSeason()) {
-  const params = new URLSearchParams({ rosterType: "active", season });
-  const data = await fetchMlb<RosterResponse>(`/teams/${teamId}/roster?${params.toString()}`, 3600);
-  return data.roster;
+  if (!/^\d+$/.test(teamId)) return [];
+
+  const rosterTypes = ["active", "40Man", "fullRoster"];
+
+  for (const rosterType of rosterTypes) {
+    try {
+      const params = new URLSearchParams({ rosterType, season, hydrate: "person" });
+      const data = await fetchMlb<RosterResponse>(`/teams/${teamId}/roster?${params.toString()}`, 3600);
+      if (data.roster?.length) return data.roster;
+    } catch {
+      // Try the next supported roster type.
+    }
+  }
+
+  return [];
 }
 
-export async function getTeamLeaders(teamId: string, season = getCurrentSeason()) {
+async function getLeaderGroup(teamId: string, season: string, statGroup: "hitting" | "pitching") {
+  const categories = statGroup === "hitting"
+    ? "homeRuns,runsBattedIn,battingAverage"
+    : "wins,strikeouts,earnedRunAverage";
+
   const params = new URLSearchParams({
-    leaderCategories: "homeRuns,runsBattedIn,battingAverage,wins,strikeouts,earnedRunAverage",
+    leaderCategories: categories,
+    statGroup,
+    teamId,
     season,
-    leaderGameTypes: "R",
+    gameTypes: "R",
+    sportId: "1",
     limit: "3",
   });
-  const data = await fetchMlb<TeamLeadersResponse>(`/teams/${teamId}/leaders?${params.toString()}`, 900);
-  return data.leagueLeaders;
+
+  const data = await fetchMlb<TeamLeadersResponse>(`/stats/leaders?${params.toString()}`, 900);
+  return data.leagueLeaders ?? [];
+}
+
+export async function getTeamLeaders(teamId: string, season = getCurrentSeason()): Promise<TeamLeaderCategory[]> {
+  if (!/^\d+$/.test(teamId)) return [];
+
+  const results = await Promise.allSettled([
+    getLeaderGroup(teamId, season, "hitting"),
+    getLeaderGroup(teamId, season, "pitching"),
+  ]);
+
+  return results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
 }
 
 export async function getTeamStanding(teamId: number, season = getCurrentSeason()): Promise<StandingsTeamRecord | null> {
