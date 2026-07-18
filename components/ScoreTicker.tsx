@@ -16,6 +16,7 @@ type TickerGame = {
   teams: { away: TickerSide; home: TickerSide };
   linescore?: {
     currentInningOrdinal?: string;
+    currentInning?: number;
     inningHalf?: string;
     inningState?: string;
   };
@@ -41,12 +42,22 @@ function easternDateString() {
   return `${year}-${month}-${day}`;
 }
 
+function inningAbbreviation(game: TickerGame) {
+  const half = (game.linescore?.inningHalf ?? game.linescore?.inningState ?? "").toLowerCase();
+  if (half.startsWith("top")) return "TOP";
+  if (half.startsWith("bottom")) return "BOT";
+  if (half.startsWith("middle")) return "MID";
+  if (half.startsWith("end")) return "END";
+  return "LIVE";
+}
+
 function gameLabel(game: TickerGame) {
   const state = game.status.abstractGameState;
   if (state === "Live") {
-    return `${game.linescore?.inningHalf ?? game.linescore?.inningState ?? ""} ${game.linescore?.currentInningOrdinal ?? ""}`.trim() || "Live";
+    const inning = game.linescore?.currentInning ?? game.linescore?.currentInningOrdinal?.replace(/\D/g, "");
+    return inning ? `${inningAbbreviation(game)} ${inning}` : "LIVE";
   }
-  if (state === "Final") return "Final";
+  if (state === "Final") return "FINAL";
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
@@ -68,10 +79,14 @@ export default function ScoreTicker() {
           sportId: "1",
           date,
           hydrate: "team,linescore",
+          _: Date.now().toString(),
         });
         const response = await fetch(`https://statsapi.mlb.com/api/v1/schedule?${params.toString()}`, {
           cache: "no-store",
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+          },
         });
         if (!response.ok) throw new Error(`Ticker request failed: ${response.status}`);
         const data = await response.json() as ScheduleResponse;
@@ -104,12 +119,12 @@ export default function ScoreTicker() {
           return (
             <Link key={game.gamePk} className={styles.game} href={`/games/${game.gamePk}`}>
               <div className={styles.teamRow}>
-                <img src={logo(game.teams.away.team.id)} alt="" width={24} height={24} />
+                <img src={logo(game.teams.away.team.id)} alt={`${game.teams.away.team.name} logo`} width={24} height={24} />
                 <strong>{preview ? "–" : game.teams.away.score ?? 0}</strong>
               </div>
               <span className={styles.status}>{gameLabel(game)}</span>
               <div className={styles.teamRow}>
-                <img src={logo(game.teams.home.team.id)} alt="" width={24} height={24} />
+                <img src={logo(game.teams.home.team.id)} alt={`${game.teams.home.team.name} logo`} width={24} height={24} />
                 <strong>{preview ? "–" : game.teams.home.score ?? 0}</strong>
               </div>
             </Link>
