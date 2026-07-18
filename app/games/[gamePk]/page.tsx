@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import BoxScoreTables from "./BoxScoreTables";
 import LineupCard, { type TeamBoxscore } from "./LineupCard";
 import LiveRefresh from "./LiveRefresh";
 import styles from "./game.module.css";
@@ -54,8 +55,8 @@ type GameFeed = {
     };
     boxscore?: {
       teams?: {
-        away?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
-        home?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats } };
+        away?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats }; pitchers?: number[] };
+        home?: TeamBoxscore & { teamStats?: { batting?: TeamStats; pitching?: TeamStats }; pitchers?: number[] };
       };
     };
   };
@@ -170,6 +171,8 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
         <h2>Line score</h2>
         {innings.length ? <div className={styles.tableScroll}><table className={styles.lineScore}><thead><tr><th>Team</th>{innings.map((inning) => <th key={inning.num}>{inning.num}</th>)}<th>R</th><th>H</th><th>E</th></tr></thead><tbody><tr><th>{away.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.away?.runs ?? "—"}</td>)}<td>{awayTotals?.runs ?? 0}</td><td>{awayTotals?.hits ?? 0}</td><td>{awayTotals?.errors ?? 0}</td></tr><tr><th>{home.name}</th>{innings.map((inning) => <td key={inning.num}>{inning.home?.runs ?? "—"}</td>)}<td>{homeTotals?.runs ?? 0}</td><td>{homeTotals?.hits ?? 0}</td><td>{homeTotals?.errors ?? 0}</td></tr></tbody></table></div> : <p className={styles.empty}>The line score will appear when game data becomes available.</p>}
       </section>
+
+      <BoxScoreTables awayName={away.name} homeName={home.name} away={awayBoxscore} home={homeBoxscore} />
 
       <div className={styles.lineupGrid}>
         <LineupCard teamName={away.name} team={awayBoxscore} />
