@@ -52,8 +52,18 @@ export type StandingsTeamRecord = {
   gamesBack: string;
   divisionRank?: string;
   leagueRank?: string;
+  sportRank?: string;
   wildCardRank?: string;
   wildCardGamesBack?: string;
+  runsScored?: number;
+  runsAllowed?: number;
+  runDifferential?: number;
+  eliminationNumber?: string;
+  wildCardEliminationNumber?: string;
+  divisionChamp?: boolean;
+  divisionLeader?: boolean;
+  wildCardLeader?: boolean;
+  clinched?: boolean;
   streak?: { streakCode: string };
   records?: { splitRecords?: StandingsSplit[] };
 };
