@@ -1,0 +1,65 @@
+.page { display: grid; gap: 28px; }
+.hero { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px; background: linear-gradient(135deg, var(--surface), var(--surface-muted)); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.hero h1 { margin: 5px 0 8px; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.05em; }
+.hero p { max-width: 760px; margin: 0; color: var(--muted); line-height: 1.6; }
+.heroStat { display: grid; min-width: 150px; gap: 3px; padding: 18px 22px; text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+.heroStat strong { font-size: 2rem; }
+.heroStat span { color: var(--muted); font-size: .8rem; font-weight: 800; }
+.controls { display: grid; gap: 18px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+.dateNav { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 18px; }
+.dateNav > a { padding: 10px 12px; color: var(--primary); font-weight: 800; }
+.dateForm, .teamFilter { display: flex; align-items: end; gap: 10px; }
+.dateForm { justify-content: center; }
+.dateForm label, .teamFilter label { display: grid; gap: 6px; color: var(--muted); font-size: .75rem; font-weight: 800; }
+.dateForm label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.dateForm input, .teamFilter select { min-height: 42px; padding: 0 12px; color: inherit; background: var(--surface-muted); border: 1px solid var(--border); border-radius: 10px; font: inherit; }
+.dateForm button, .teamFilter button { min-height: 42px; padding: 0 16px; color: #fff; background: var(--primary); border: 0; border-radius: 10px; font: inherit; font-weight: 900; cursor: pointer; }
+.weekStrip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+.weekStrip a { display: grid; gap: 4px; padding: 12px 8px; text-align: center; background: var(--surface-muted); border: 1px solid transparent; border-radius: 12px; }
+.weekStrip a:hover { border-color: var(--primary); }
+.weekStrip span { color: var(--muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; }
+.weekStrip strong { font-size: .92rem; }
+.weekStrip .activeDay { color: #fff; background: var(--primary); }
+.weekStrip .activeDay span { color: rgba(255,255,255,.78); }
+.teamFilter { flex-wrap: wrap; }
+.teamFilter label { flex: 1 1 280px; }
+.teamFilter select { width: 100%; margin-top: 6px; }
+.teamFilter a { padding: 11px 4px; color: var(--primary); font-weight: 800; }
+.dateHeading, .groupHeading { display: flex; align-items: end; justify-content: space-between; gap: 18px; }
+.dateHeading h2, .groupHeading h2 { margin: 4px 0 0; }
+.dateHeading h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); }
+.summaryPills { display: flex; flex-wrap: wrap; gap: 8px; }
+.summaryPills span { padding: 7px 10px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; font-size: .76rem; font-weight: 800; }
+.group { display: grid; gap: 15px; }
+.groupHeading > span { color: var(--muted); font-size: .8rem; font-weight: 800; }
+.gameGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.gameCard { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 17px; box-shadow: var(--shadow); }
+.liveCard { border-color: var(--live); }
+.gameHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 17px; background: var(--surface-muted); border-bottom: 1px solid var(--border); }
+.gameHeader > div { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.status { padding: 5px 8px; border-radius: 999px; font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.liveStatus { color: #fff; background: var(--live); }
+.finalStatus { color: var(--muted); background: var(--surface); border: 1px solid var(--border); }
+.previewStatus { color: var(--primary); background: var(--surface); border: 1px solid var(--border); }
+.series { color: var(--muted); font-size: .76rem; }
+.gameCenterLink { color: var(--primary); font-size: .8rem; font-weight: 900; white-space: nowrap; }
+.matchup { display: grid; gap: 2px; padding: 14px 17px; }
+.teamLine { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 8px 0; }
+.teamLine img { width: 42px; height: 42px; object-fit: contain; }
+.teamLine > div { display: grid; min-width: 0; gap: 3px; }
+.teamLine a { overflow: hidden; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.teamLine span { color: var(--muted); font-size: .73rem; }
+.teamLine > strong { min-width: 28px; font-size: 1.35rem; text-align: right; }
+.at { margin: -3px 0 -3px 53px; color: var(--muted); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
+.details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); }
+.details > div { display: grid; gap: 5px; padding: 13px 14px; border-right: 1px solid var(--border); }
+.details > div:last-child { border-right: 0; }
+.details span { color: var(--muted); font-size: .68rem; font-weight: 800; text-transform: uppercase; }
+.details strong { font-size: .76rem; line-height: 1.45; }
+.empty { display: grid; justify-items: center; gap: 8px; padding: 52px 24px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: 18px; }
+.empty h2 { margin: 0; }
+.empty p { max-width: 560px; margin: 0; color: var(--muted); line-height: 1.6; }
+.empty a { margin-top: 8px; color: var(--primary); font-weight: 900; }
+@media (max-width: 980px) { .gameGrid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .hero { align-items: stretch; flex-direction: column; padding: 22px; } .heroStat { grid-template-columns: auto 1fr; align-items: center; min-width: 0; text-align: left; } .dateNav { grid-template-columns: 1fr 1fr; } .dateForm { grid-column: 1 / -1; grid-row: 1; } .dateNav > a { text-align: center; } .weekStrip { display: flex; overflow-x: auto; padding-bottom: 4px; } .weekStrip a { min-width: 92px; } .dateHeading { align-items: flex-start; flex-direction: column; } .details { grid-template-columns: 1fr; } .details > div { border-right: 0; border-bottom: 1px solid var(--border); } .details > div:last-child { border-bottom: 0; } }
+@media (max-width: 520px) { .controls { padding: 14px; } .dateForm { flex-wrap: wrap; } .dateForm input { flex: 1 1 190px; } .teamFilter button { flex: 1; } .gameHeader { align-items: flex-start; } .gameHeader, .matchup { padding-left: 13px; padding-right: 13px; } .teamLine { grid-template-columns: 36px minmax(0, 1fr) auto; } .teamLine img { width: 36px; height: 36px; } .at { margin-left: 47px; } }
