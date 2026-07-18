@@ -1,0 +1,36 @@
+.page { display: grid; gap: 22px; }
+.hero { display: grid; grid-template-columns: 120px minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); }
+.logo { width: 112px; height: 112px; object-fit: contain; }
+.hero h1 { margin: 4px 0 8px; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: -.045em; }
+.meta { margin: 0; color: var(--muted); line-height: 1.55; }
+.record { display: grid; min-width: 170px; gap: 4px; padding: 18px 22px; text-align: center; background: var(--surface-muted); border: 1px solid var(--border); border-radius: 16px; }
+.record strong { font-size: 2rem; }
+.record span { color: var(--muted); font-size: .85rem; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.card { overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
+.cardHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.cardHeader h2 { margin: 0; font-size: 1.2rem; }
+.cardHeader span { color: var(--muted); font-size: .8rem; }
+.gameList, .leaderList, .rosterList { margin: 0; padding: 0; list-style: none; }
+.gameLink { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); transition: background 150ms ease; }
+.gameLink:hover { background: var(--surface-muted); }
+.date { color: var(--muted); font-size: .8rem; }
+.opponent { display: grid; gap: 3px; }
+.opponent strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.opponent span { color: var(--muted); font-size: .78rem; }
+.score { font-weight: 900; }
+.resultWin { color: var(--success); }
+.resultLoss { color: var(--live); }
+.leaders { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.leaderList li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
+.leaderList strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderList span { color: var(--primary); font-weight: 900; }
+.rosterSection { padding: 0 20px 20px; }
+.rosterGroup h3 { margin: 20px 0 10px; color: var(--primary); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
+.rosterList { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 14px; }
+.rosterList li { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 8px; padding: 9px 10px; background: var(--surface-muted); border-radius: 9px; }
+.rosterList span { color: var(--muted); }
+.empty { padding: 24px 20px; color: var(--muted); }
+.back { width: fit-content; color: var(--primary); font-weight: 800; }
+@media (max-width: 900px) { .hero { grid-template-columns: 90px minmax(0, 1fr); } .logo { width: 86px; height: 86px; } .record { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); } .leaders { grid-template-columns: 1fr; } .rosterList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .hero { grid-template-columns: 70px minmax(0, 1fr); padding: 20px; } .logo { width: 66px; height: 66px; } .grid { grid-template-columns: 1fr; } .gameLink { grid-template-columns: 72px minmax(0, 1fr) auto; padding: 13px 14px; } .rosterList { grid-template-columns: 1fr; } }
