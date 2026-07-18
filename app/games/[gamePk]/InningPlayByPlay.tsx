@@ -38,16 +38,33 @@ export default function InningPlayByPlay({ plays, currentInning }: { plays: Play
   }
 
   return (
-    <div className={styles.inningAccordion}>
+    <div style={{ display: "grid", gap: 10 }}>
       {innings.map((inning) => {
         const inningPlays = grouped.get(inning) ?? [];
         return (
-          <details key={inning} className={styles.inningDetails} open={inning === defaultInning}>
-            <summary>
+          <details
+            key={inning}
+            open={inning === defaultInning}
+            style={{ border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}
+          >
+            <summary
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                padding: "13px 15px",
+                cursor: "pointer",
+                fontWeight: 900,
+                background: "var(--surface-muted)",
+              }}
+            >
               <span>{ordinal(inning)} inning</span>
-              <small>{inningPlays.length} {inningPlays.length === 1 ? "play" : "plays"}</small>
+              <small style={{ color: "var(--muted)", fontWeight: 700 }}>
+                {inningPlays.length} {inningPlays.length === 1 ? "play" : "plays"}
+              </small>
             </summary>
-            <ol className={`${styles.playList} ${styles.inningPlayList}`}>
+            <ol className={styles.playList} style={{ padding: 12 }}>
               {inningPlays.map((play, index) => (
                 <li key={`${inning}-${play.about?.atBatIndex ?? index}`}>
                   <div>
