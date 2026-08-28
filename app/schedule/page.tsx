@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { tvBroadcastLabel } from "@/lib/broadcasts";
 import {
   getAllMlbTeams,
   getEasternDateString,
@@ -32,11 +33,6 @@ function hrefFor(date: string, team?: string) {
   const params = new URLSearchParams({ date });
   if (team) params.set("team", team);
   return `/schedule?${params.toString()}`;
-}
-
-function broadcastLabel(game: MlbGame) {
-  const names = [...new Set((game.broadcasts ?? []).filter((item) => item.type === "TV").map((item) => item.name))];
-  return names.length ? names.join(" · ") : "Broadcast TBD";
 }
 
 function stateLabel(game: MlbGame) {
@@ -95,10 +91,8 @@ function GameCard({ game }: { game: MlbGame }) {
           <span>Ballpark</span>
           <strong>{game.venue?.name ?? "Venue TBD"}</strong>
         </div>
-        <div>
-          <span>Watch</span>
-          <strong>{broadcastLabel(game)}</strong>
-        </div>
+        <div><span>Away TV</span><strong>{tvBroadcastLabel(game.broadcasts, "away")}</strong></div>
+        <div><span>Home TV</span><strong>{tvBroadcastLabel(game.broadcasts, "home")}</strong></div>
       </div>
     </article>
   );
