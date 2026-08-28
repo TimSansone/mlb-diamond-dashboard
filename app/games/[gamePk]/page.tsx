@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTeamStanding } from "@/lib/mlb";
+import { tvBroadcastLabel } from "@/lib/broadcasts";
+import { getEasternDateString, getMlbGames, getTeamStanding } from "@/lib/mlb";
 import BoxScoreTables from "./BoxScoreTables";
 import InningPlayByPlay from "./InningPlayByPlay";
 import LineupCard, { type TeamBoxscore } from "./LineupCard";
@@ -95,10 +96,13 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   if (!/^\d+$/.test(gamePk)) notFound();
   const game = await getGame(gamePk);
   const { away, home } = game.gameData.teams;
-  const [awayRecord, homeRecord] = await Promise.all([
+  const broadcastDate = getEasternDateString(new Date(game.gameData.datetime.dateTime));
+  const [awayRecord, homeRecord, scheduleGames] = await Promise.all([
     getTeamStanding(away.id).catch(() => null),
     getTeamStanding(home.id).catch(() => null),
+    getMlbGames(broadcastDate).catch(() => []),
   ]);
+  const scheduleGame = scheduleGames.find((item) => String(item.gamePk) === gamePk);
   const line = game.liveData.linescore;
   const awayTotals = line?.teams?.away; const homeTotals = line?.teams?.home; const innings = line?.innings ?? [];
   const allPlays = game.liveData.plays?.allPlays ?? []; const currentPlay = game.liveData.plays?.currentPlay;
@@ -120,6 +124,7 @@ export default async function GameCenterPage({ params }: { params: Promise<{ gam
   return <div className={styles.page}>
     <div className={styles.topBar}><Link className={styles.back} href="/">← Back to scoreboard</Link><LiveRefresh active={live} /></div>
     <header className={`${styles.hero} ${live ? styles.liveHero : ""}`}><TeamHeader team={away} score={awayTotals?.runs} side="Away" record={awayRecord} /><div className={styles.status}><span className="eyebrow">{live ? "Live GameDay" : "Game Center"}</span><strong>{game.gameData.status.detailedState}</strong><span>{gameContext(game)}</span>{game.gameData.venue?.name && <small>{game.gameData.venue.name}</small>}</div><TeamHeader team={home} score={homeTotals?.runs} side="Home" record={homeRecord} /></header>
+    <section className={styles.broadcasts} aria-label="Television broadcasts"><div><span>Away TV</span><strong>{tvBroadcastLabel(scheduleGame?.broadcasts, "away")}</strong></div><div><span>Home TV</span><strong>{tvBroadcastLabel(scheduleGame?.broadcasts, "home")}</strong></div></section>
 
     {(live || currentPlay || pitchPlay) && <>
       <section className={styles.livePanel}>
