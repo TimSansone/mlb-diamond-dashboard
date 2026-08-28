@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { tvBroadcastLabel } from "@/lib/broadcasts";
 import type { LiveGameSituation } from "@/lib/live-situations";
 import type { MlbGame, MlbTeamSide } from "@/types/mlb";
 
@@ -132,6 +133,10 @@ export default function GameCard({ game, situation }: { game: MlbGame; situation
             <div><span>Home starter</span><strong>{homePitcher ?? "TBD"}</strong></div>
           </div>
         )}
+        <div className="broadcastPanel" aria-label="Television broadcasts">
+          <div><span>Away TV</span><strong>{tvBroadcastLabel(game.broadcasts, "away")}</strong></div>
+          <div><span>Home TV</span><strong>{tvBroadcastLabel(game.broadcasts, "home")}</strong></div>
+        </div>
         <div className="openGameCenter">Open Game Center →</div>
       </article>
     </Link>
