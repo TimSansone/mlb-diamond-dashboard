@@ -322,6 +322,38 @@ main {
   white-space: nowrap;
 }
 
+.broadcastPanel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+}
+
+.broadcastPanel > div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  padding: 12px 15px;
+  background: var(--surface);
+}
+
+.broadcastPanel span {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.broadcastPanel strong {
+  overflow: hidden;
+  color: var(--primary);
+  font-size: .82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .emptyState {
   display: grid;
   justify-items: center;
