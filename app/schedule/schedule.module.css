@@ -51,7 +51,7 @@
 .teamLine span { color: var(--muted); font-size: .73rem; }
 .teamLine > strong { min-width: 28px; font-size: 1.35rem; text-align: right; }
 .at { margin: -3px 0 -3px 53px; color: var(--muted); font-size: .7rem; font-weight: 900; text-transform: uppercase; }
-.details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); }
+.details { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border); }
 .details > div { display: grid; gap: 5px; padding: 13px 14px; border-right: 1px solid var(--border); }
 .details > div:last-child { border-right: 0; }
 .details span { color: var(--muted); font-size: .68rem; font-weight: 800; text-transform: uppercase; }
