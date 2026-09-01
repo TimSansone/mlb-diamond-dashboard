@@ -64,17 +64,36 @@ export default function ScoreboardAutoRefresh({ active }: { active: boolean }) {
 
   if (!active) return null;
 
+  const floatingLabel = isPending
+    ? "Updating scores…"
+    : enabled
+      ? `Refresh now (next auto-update in ${secondsLeft}s)`
+      : "Refresh now";
+
   return (
-    <div className="autoRefreshBar" aria-label="Scoreboard refresh controls">
-      <button type="button" className="refreshToggle" aria-pressed={enabled} onClick={toggleAutoRefresh}>
-        {enabled ? "⟳ Auto-refresh on" : "⏸ Auto-refresh off"}
+    <>
+      <div className="autoRefreshBar" aria-label="Scoreboard refresh controls">
+        <button type="button" className="refreshToggle" aria-pressed={enabled} onClick={toggleAutoRefresh}>
+          {enabled ? "⟳ Auto-refresh on" : "⏸ Auto-refresh off"}
+        </button>
+        <span className="scoreRefreshStatus" aria-live="polite">
+          {isPending ? "Updating scores…" : enabled ? `Next update in ${secondsLeft}s` : "Auto-refresh paused"}
+        </span>
+        <button type="button" className="refreshNowButton" onClick={handleManualRefresh} disabled={isPending}>
+          Refresh now
+        </button>
+      </div>
+
+      <button
+        type="button"
+        className={`floatingRefreshButton${isPending ? " isPending" : ""}`}
+        onClick={handleManualRefresh}
+        disabled={isPending}
+        title={floatingLabel}
+        aria-label={floatingLabel}
+      >
+        <span className="floatingRefreshIcon" aria-hidden="true">⟳</span>
       </button>
-      <span className="scoreRefreshStatus" aria-live="polite">
-        {isPending ? "Updating scores…" : enabled ? `Next update in ${secondsLeft}s` : "Auto-refresh paused"}
-      </span>
-      <button type="button" className="refreshNowButton" onClick={handleManualRefresh} disabled={isPending}>
-        Refresh now
-      </button>
-    </div>
+    </>
   );
 }

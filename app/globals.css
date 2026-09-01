@@ -909,12 +909,78 @@ main {
   }
 }
 
+.floatingRefreshButton {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 41;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  color: #fff;
+  background: var(--primary);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: 0 14px 30px rgba(17, 37, 66, 0.28);
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.floatingRefreshButton:hover {
+  background: var(--primary-strong);
+  box-shadow: 0 16px 34px rgba(17, 37, 66, 0.34);
+  transform: translateY(-2px);
+}
+
+.floatingRefreshButton:active {
+  transform: translateY(0);
+}
+
+.floatingRefreshButton:disabled {
+  cursor: default;
+  opacity: 0.85;
+  transform: none;
+}
+
+.floatingRefreshButton:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.floatingRefreshIcon {
+  display: inline-block;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.floatingRefreshButton.isPending .floatingRefreshIcon {
+  animation: floatingRefreshSpin 800ms linear infinite;
+}
+
+@keyframes floatingRefreshSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 700px) {
   .alertsStack {
     right: 12px;
     bottom: 12px;
     left: 12px;
     width: auto;
+  }
+
+  .floatingRefreshButton {
+    left: 12px;
+    bottom: 88px;
+    width: 48px;
+    height: 48px;
   }
 }
 
