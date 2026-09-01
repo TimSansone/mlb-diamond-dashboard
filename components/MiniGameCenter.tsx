@@ -1,4 +1,4 @@
-import type { LiveGameSituation } from "@/lib/live-situations";
+import type { LiveGameSituation, PitchBadge } from "@/lib/live-situations";
 
 function headshotUrl(playerId?: number): string {
   return playerId
@@ -29,18 +29,53 @@ function OutsDisplay({ outs }: { outs: number }) {
   );
 }
 
-function MiniPlayer({ label, name, playerId }: { label: string; name: string; playerId?: number }) {
+function pitchBadgeClass(kind: PitchBadge["kind"]) {
+  if (kind === "ball") return "miniPitchBall";
+  if (kind === "strike") return "miniPitchStrike";
+  if (kind === "foul") return "miniPitchFoul";
+  if (kind === "inplay") return "miniPitchInPlay";
+  return "miniPitchOther";
+}
+
+function PitchSequenceRow({ pitches }: { pitches: PitchBadge[] }) {
+  if (!pitches.length) return null;
+  return (
+    <div className="miniPitchSequence" aria-label="Pitches this at-bat">
+      <span>Pitches this AB</span>
+      <div className="miniPitchBadges">
+        {pitches.map((pitch, index) => (
+          <span key={index} className={`miniPitchBadge ${pitchBadgeClass(pitch.kind)}`} title={pitch.label}>
+            {pitch.code}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MiniPlayer({ label, name, playerId, line }: { label: string; name: string; playerId?: number; line?: string }) {
   return (
     <div className="miniPlayer">
       {playerId
         ? <img src={headshotUrl(playerId)} alt="" width={38} height={38} />
         : <span className="miniPlayerPlaceholder" aria-hidden="true" />}
-      <div><span>{label}</span><strong>{name}</strong></div>
+      <div>
+        <span>{label}</span>
+        <strong>{name}</strong>
+        {line && <em>{line}</em>}
+      </div>
     </div>
   );
 }
 
 export default function MiniGameCenter({ situation }: { situation: LiveGameSituation }) {
+  const batterLine = situation.batterLine
+    ? `${situation.batterLine.hits}-${situation.batterLine.atBats}${situation.batterLine.rbi ? `, ${situation.batterLine.rbi} RBI` : ""} today`
+    : undefined;
+  const pitcherLine = situation.pitcherLine
+    ? `${situation.pitcherLine.pitches}p (${situation.pitcherLine.balls}-${situation.pitcherLine.strikes}) · ${situation.pitcherLine.inningsPitched} IP · ${situation.pitcherLine.era} ERA`
+    : undefined;
+
   return (
     <section className="miniGameCenter" aria-label="Current game situation">
       <div className="miniSituationTop">
@@ -50,11 +85,12 @@ export default function MiniGameCenter({ situation }: { situation: LiveGameSitua
           <div className="miniOutBlock"><OutsDisplay outs={situation.outs} /><span>Outs</span></div>
         </div>
       </div>
+      <PitchSequenceRow pitches={situation.pitchSequence} />
       <div className="miniMatchup">
-        <MiniPlayer label="At bat" name={situation.batter} playerId={situation.batterId} />
-        <MiniPlayer label="Pitching" name={situation.pitcher} playerId={situation.pitcherId} />
+        <MiniPlayer label="At bat" name={situation.batter} playerId={situation.batterId} line={batterLine} />
+        <MiniPlayer label="Pitching" name={situation.pitcher} playerId={situation.pitcherId} line={pitcherLine} />
       </div>
-      {situation.lastPitch && <div className="miniLastPitch"><span>Last pitch</span><strong>{situation.lastPitch}</strong></div>}
+      {situation.latestPlay && <div className="miniLatestPlay"><span>Latest play</span><strong>{situation.latestPlay}</strong></div>}
     </section>
   );
 }

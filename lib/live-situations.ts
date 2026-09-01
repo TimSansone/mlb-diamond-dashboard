@@ -1,3 +1,23 @@
+export type PitchBadge = {
+  code: string;
+  label: string;
+  kind: "ball" | "strike" | "foul" | "inplay" | "other";
+};
+
+export type PlayerGameLine = {
+  hits: number;
+  atBats: number;
+  rbi: number;
+};
+
+export type PitcherGameLine = {
+  pitches: number;
+  balls: number;
+  strikes: number;
+  inningsPitched: string;
+  era: string;
+};
+
 export type LiveGameSituation = {
   balls: number;
   strikes: number;
@@ -7,19 +27,28 @@ export type LiveGameSituation = {
   thirdOccupied: boolean;
   batter: string;
   batterId?: number;
+  batterLine?: PlayerGameLine;
   pitcher: string;
   pitcherId?: number;
+  pitcherLine?: PitcherGameLine;
   lastPitch?: string;
+  latestPlay?: string;
+  pitchSequence: PitchBadge[];
 };
 
 type Person = { id?: number; fullName?: string };
 type PlayEvent = {
-  details?: { isPitch?: boolean; description?: string; call?: { description?: string }; type?: { description?: string } };
+  details?: {
+    isPitch?: boolean;
+    description?: string;
+    call?: { description?: string; code?: string };
+    type?: { description?: string; code?: string };
+  };
   pitchData?: { startSpeed?: number };
 };
-type Play = {
-  result?: { description?: string; event?: string };
-  about?: { inning?: number; halfInning?: string; isScoringPlay?: boolean };
+export type Play = {
+  result?: { description?: string; event?: string; awayScore?: number; homeScore?: number; rbi?: number };
+  about?: { inning?: number; halfInning?: string; isScoringPlay?: boolean; isComplete?: boolean };
   count?: { balls?: number; strikes?: number; outs?: number };
   matchup?: { batter?: Person; pitcher?: Person };
   playEvents?: PlayEvent[];
@@ -30,6 +59,48 @@ type InningLine = {
   home?: { runs?: number; hits?: number; errors?: number };
 };
 type Decisions = { winner?: Person; loser?: Person; save?: Person };
+
+export type BattingStats = {
+  atBats?: number;
+  runs?: number;
+  hits?: number;
+  rbi?: number;
+  baseOnBalls?: number;
+  strikeOuts?: number;
+  homeRuns?: number;
+  doubles?: number;
+  triples?: number;
+  avg?: string;
+};
+
+export type PitchingStats = {
+  inningsPitched?: string;
+  hits?: number;
+  runs?: number;
+  earnedRuns?: number;
+  baseOnBalls?: number;
+  strikeOuts?: number;
+  homeRuns?: number;
+  numberOfPitches?: number;
+  strikes?: number;
+  era?: string;
+};
+
+export type BoxscorePerson = {
+  person?: Person;
+  jerseyNumber?: string;
+  position?: { abbreviation?: string; name?: string };
+  battingOrder?: string;
+  stats?: { batting?: BattingStats; pitching?: PitchingStats };
+  seasonStats?: { batting?: BattingStats; pitching?: PitchingStats };
+};
+
+export type TeamBoxscore = {
+  battingOrder?: number[];
+  batters?: number[];
+  pitchers?: number[];
+  players?: Record<string, BoxscorePerson>;
+};
 
 export type LiveFeed = {
   liveData?: {
@@ -50,6 +121,9 @@ export type LiveFeed = {
       allPlays?: Play[];
     };
     decisions?: Decisions;
+    boxscore?: {
+      teams?: { away?: TeamBoxscore; home?: TeamBoxscore };
+    };
   };
 };
 
@@ -64,9 +138,63 @@ function lastPitchLabel(events?: PlayEvent[]) {
   return parts.join(" · ") || undefined;
 }
 
+function classifyPitch(event: PlayEvent): PitchBadge {
+  const label = event.details?.call?.description ?? event.details?.description ?? "Pitch";
+  const lower = label.toLowerCase();
+
+  if (lower.includes("in play")) return { code: "X", label, kind: "inplay" };
+  if (lower.includes("foul")) return { code: "F", label, kind: "foul" };
+  if (lower.includes("swinging strike") || lower.includes("missed bunt") || lower.includes("called strike")) {
+    return { code: "S", label, kind: "strike" };
+  }
+  if (lower.includes("hit by pitch")) return { code: "HBP", label, kind: "other" };
+  if (lower.includes("ball") || lower.includes("pitchout")) return { code: "B", label, kind: "ball" };
+  return { code: "•", label, kind: "other" };
+}
+
+function pitchSequenceFor(play?: Play): PitchBadge[] {
+  const events = (play?.playEvents ?? []).filter((event) => event.details?.isPitch || Boolean(event.pitchData));
+  return events.map(classifyPitch);
+}
+
+function findPlayer(id: number | undefined, away?: TeamBoxscore, home?: TeamBoxscore): BoxscorePerson | undefined {
+  if (!id) return undefined;
+  return away?.players?.[`ID${id}`] ?? home?.players?.[`ID${id}`];
+}
+
+function batterLineFor(id: number | undefined, away?: TeamBoxscore, home?: TeamBoxscore): PlayerGameLine | undefined {
+  const stats = findPlayer(id, away, home)?.stats?.batting;
+  if (!stats) return undefined;
+  return { hits: stats.hits ?? 0, atBats: stats.atBats ?? 0, rbi: stats.rbi ?? 0 };
+}
+
+function pitcherLineFor(id: number | undefined, away?: TeamBoxscore, home?: TeamBoxscore): PitcherGameLine | undefined {
+  const player = findPlayer(id, away, home);
+  const stats = player?.stats?.pitching;
+  if (!stats) return undefined;
+  const pitches = stats.numberOfPitches ?? 0;
+  const strikes = stats.strikes ?? 0;
+  return {
+    pitches,
+    strikes,
+    balls: Math.max(0, pitches - strikes),
+    inningsPitched: stats.inningsPitched ?? "0.0",
+    era: player?.seasonStats?.pitching?.era ?? stats.era ?? "—",
+  };
+}
+
+function latestPlayFor(allPlays?: Play[]): string | undefined {
+  const play = [...(allPlays ?? [])].reverse().find(
+    (item) => item.about?.isComplete !== false && Boolean(item.result?.description || item.result?.event),
+  );
+  return play?.result?.description ?? play?.result?.event;
+}
+
 export function parseLiveSituation(feed: LiveFeed): LiveGameSituation {
   const line = feed.liveData?.linescore;
   const play = feed.liveData?.plays?.currentPlay;
+  const away = feed.liveData?.boxscore?.teams?.away;
+  const home = feed.liveData?.boxscore?.teams?.home;
   const batter = play?.matchup?.batter;
   const pitcher = play?.matchup?.pitcher ?? line?.defense?.pitcher;
 
@@ -79,9 +207,13 @@ export function parseLiveSituation(feed: LiveFeed): LiveGameSituation {
     thirdOccupied: Boolean(line?.offense?.third),
     batter: batter?.fullName ?? "TBD",
     batterId: batter?.id,
+    batterLine: batterLineFor(batter?.id, away, home),
     pitcher: pitcher?.fullName ?? "TBD",
     pitcherId: pitcher?.id,
+    pitcherLine: pitcherLineFor(pitcher?.id, away, home),
     lastPitch: lastPitchLabel(play?.playEvents),
+    latestPlay: latestPlayFor(feed.liveData?.plays?.allPlays),
+    pitchSequence: pitchSequenceFor(play),
   };
 }
 

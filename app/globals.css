@@ -917,3 +917,132 @@ main {
     width: auto;
   }
 }
+
+.quickLookScoring {
+  display: grid;
+  gap: 8px;
+}
+
+.quickLookScoring h3,
+.quickLookSectionTitle,
+.quickLookTeam h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quickLookScoring ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quickLookScoring li {
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+}
+
+.quickLookScoringMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 10px;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.quickLookScoringMeta span {
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.quickLookScoring p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+}
+
+.quickLookPerformances {
+  display: grid;
+  gap: 10px;
+}
+
+.quickLookTeam {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.quickLookLineup {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quickLookLineup li {
+  display: grid;
+  grid-template-columns: 16px minmax(0,1fr);
+  gap: 1px 8px;
+  padding: 3px 0;
+  font-size: 0.78rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.quickLookLineup li:last-child {
+  border-bottom: 0;
+}
+
+.quickLookSlot {
+  grid-row: 1 / span 2;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.quickLookPlayerName {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickLookPlayerName small {
+  margin-left: 5px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quickLookPlayerLine {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.quickLookPitchers {
+  display: grid;
+  gap: 3px;
+  margin: 5px 0 0;
+  padding: 6px 0 0;
+  border-top: 1px dashed var(--border);
+  list-style: none;
+}
+
+.quickLookPitchers li {
+  display: grid;
+  gap: 1px;
+  font-size: 0.76rem;
+}
+
+.quickLookPitchers .quickLookPlayerName {
+  font-weight: 700;
+}

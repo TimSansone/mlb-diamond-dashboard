@@ -7,6 +7,7 @@ import { getBaseballCentral } from "@/lib/baseball-central";
 import { getLiveGameSituations } from "@/lib/live-situations";
 import { getFreshMlbGames } from "@/lib/live-scores";
 import { getEasternDateString, getMlbGames, isValidDateString } from "@/lib/mlb";
+import type { MlbGame } from "@/types/mlb";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -14,6 +15,20 @@ export const revalidate = 0;
 type HomePageProps = {
   searchParams: Promise<{ date?: string }>;
 };
+
+function statusPriority(game: MlbGame) {
+  const state = game.status.abstractGameState;
+  if (state === "Live") return 0;
+  if (state === "Final") return 2;
+  return 1;
+}
+
+function sortGamesByStatus(games: MlbGame[]): MlbGame[] {
+  return games
+    .map((game, index) => ({ game, index }))
+    .sort((a, b) => statusPriority(a.game) - statusPriority(b.game) || a.index - b.index)
+    .map(({ game }) => game);
+}
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
@@ -49,7 +64,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
       {games.length > 0 ? (
         <div className="gameGrid">
-          {games.map((game) => (
+          {sortGamesByStatus(games).map((game) => (
             <GameCard key={game.gamePk} game={game} situation={liveSituations[game.gamePk]} />
           ))}
         </div>

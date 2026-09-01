@@ -158,7 +158,8 @@
 }
 
 .miniPlayer span,
-.miniLastPitch span {
+.miniLastPitch span,
+.miniLatestPlay span {
   color: rgba(255,255,255,.62);
   font-size: .58rem;
   font-weight: 900;
@@ -173,7 +174,17 @@
   white-space: nowrap;
 }
 
-.miniLastPitch {
+.miniPlayer em {
+  overflow: hidden;
+  color: rgba(255,255,255,.72);
+  font-size: .64rem;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.miniLastPitch,
+.miniLatestPlay {
   display: grid;
   gap: 3px;
   padding: 8px 10px;
@@ -182,11 +193,73 @@
   border-radius: 7px;
 }
 
-.miniLastPitch strong {
+.miniLastPitch strong,
+.miniLatestPlay strong {
   overflow: hidden;
   font-size: .7rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.miniPitchSequence {
+  display: grid;
+  gap: 4px;
+}
+
+.miniPitchSequence span:first-child {
+  color: rgba(255,255,255,.62);
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.miniPitchBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.miniPitchBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 5px;
+  font-size: .62rem;
+  font-weight: 900;
+}
+
+.miniPitchBall {
+  color: #cfe6ff;
+  background: rgba(79,153,255,.28);
+  border: 1px solid rgba(79,153,255,.5);
+}
+
+.miniPitchStrike {
+  color: #ffd7d2;
+  background: rgba(239,51,64,.28);
+  border: 1px solid rgba(239,51,64,.5);
+}
+
+.miniPitchFoul {
+  color: #ffe9b8;
+  background: rgba(214,155,45,.3);
+  border: 1px solid rgba(214,155,45,.55);
+}
+
+.miniPitchInPlay {
+  color: #cdf5d8;
+  background: rgba(18,128,92,.32);
+  border: 1px solid rgba(18,128,92,.55);
+}
+
+.miniPitchOther {
+  color: rgba(255,255,255,.82);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.28);
 }
 
 @media (max-width: 420px) {
