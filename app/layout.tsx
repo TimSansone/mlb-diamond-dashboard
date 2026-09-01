@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import ScoreTicker from "@/components/ScoreTicker";
 import "./globals.css";
 import "./design-system.css";
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/schedule">Schedule</Link>
             </nav>
           </header>
-          <ScoreTicker />
+          <Suspense fallback={null}>
+            <ScoreTicker />
+          </Suspense>
         </div>
         <main>{children}</main>
       </body>

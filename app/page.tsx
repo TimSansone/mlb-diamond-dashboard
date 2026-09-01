@@ -35,7 +35,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const today = getEasternDateString();
   const selectedDate = isValidDateString(params.date) ? params.date : today;
   const isToday = selectedDate === today;
-  const games = isToday ? await getFreshMlbGames(selectedDate) : await getMlbGames(selectedDate);
+  const isFutureDate = selectedDate > today;
+  // Fetch uncached data for today and any past date so a game that's still
+  // live from a prior calendar day (e.g. a late West Coast start crossing
+  // midnight Eastern) keeps getting real-time updates, not just "today".
+  const games = isFutureDate ? await getMlbGames(selectedDate) : await getFreshMlbGames(selectedDate);
+  const hasUnfinishedGames = games.some((game) => game.status.abstractGameState !== "Final");
+  // Keep the refresh controls (and their polling) alive whenever the
+  // selected date could still change: it's today, or it's a past date that
+  // still has a game in progress.
+  const showLiveControls = isToday || (!isFutureDate && hasUnfinishedGames);
   const liveGamePks = games
     .filter((game) => game.status.abstractGameState === "Live")
     .map((game) => game.gamePk);
@@ -47,9 +56,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <section className="scoreboardPage">
       <DateNavigator date={selectedDate} today={today} />
-      {isToday && (
+      {showLiveControls && (
         <div className="controlsRow">
-          <ScoreboardAutoRefresh active={isToday} />
+          <ScoreboardAutoRefresh active={showLiveControls} />
           <LiveAlerts games={games} />
         </div>
       )}

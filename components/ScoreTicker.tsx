@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./ScoreTicker.module.css";
 
@@ -85,6 +86,10 @@ function gameStatusLabel(game: TickerGame) {
   return `Live, inning ${inning}`;
 }
 
+function isValidDateParam(value: string | null): value is string {
+  return Boolean(value) && /^\d{4}-\d{2}-\d{2}$/.test(value as string);
+}
+
 function tickerPriority(game: TickerGame) {
   const state = game.status.abstractGameState;
   if (state === "Live") return 0;
@@ -116,11 +121,17 @@ async function requestScores(date: string): Promise<ScheduleResponse> {
 }
 
 export default function ScoreTicker() {
+  const searchParams = useSearchParams();
+  const requestedDate = searchParams.get("date");
   const [games, setGames] = useState<TickerGame[]>([]);
   const [failed, setFailed] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const date = useMemo(() => easternDateString(), []);
+  const date = useMemo(
+    () => (isValidDateParam(requestedDate) ? requestedDate : easternDateString()),
+    [requestedDate],
+  );
+  const isToday = useMemo(() => date === easternDateString(), [date]);
   const orderedGames = useMemo(
     () => games
       .map((game, originalIndex) => ({ game, originalIndex }))
@@ -131,6 +142,9 @@ export default function ScoreTicker() {
 
   useEffect(() => {
     let mounted = true;
+    setGames([]);
+    setUpdatedAt(null);
+    setFailed(false);
 
     async function loadGames() {
       try {
@@ -165,12 +179,21 @@ export default function ScoreTicker() {
     return () => scroller.removeEventListener("wheel", onWheel);
   }, []);
 
+  const dateLabel = isToday
+    ? null
+    : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(
+        new Date(`${date}T12:00:00Z`),
+      );
+
   return (
-    <aside className={styles.band} aria-label="Today's MLB scores">
+    <aside className={styles.band} aria-label={isToday ? "Today's MLB scores" : `MLB scores for ${dateLabel}`}>
       <div className={styles.bandInner}>
         <div className={styles.labelBlock}>
           <span className={styles.liveDot} aria-hidden="true" />
-          <div><strong>MLB Scores</strong><small>{updatedAt ? `Updated ${updatedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Live feed"}</small></div>
+          <div>
+            <strong>{isToday ? "MLB Scores" : `MLB Scores · ${dateLabel}`}</strong>
+            <small>{updatedAt ? `Updated ${updatedAt.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Live feed"}</small>
+          </div>
         </div>
 
         {orderedGames.length ? (
@@ -210,7 +233,7 @@ export default function ScoreTicker() {
           </div>
         ) : (
           <div className={styles.loading} role="status">
-            {failed ? "Scores temporarily unavailable" : "Loading today's scores…"}
+            {failed ? "Scores temporarily unavailable" : isToday ? "Loading today's scores…" : "Loading scores…"}
           </div>
         )}
       </div>
