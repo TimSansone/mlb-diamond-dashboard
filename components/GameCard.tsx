@@ -1,16 +1,15 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { tvBroadcastLabel } from "@/lib/broadcasts";
 import type { LiveGameSituation } from "@/lib/live-situations";
 import type { MlbGame, MlbTeamSide } from "@/types/mlb";
+import GameQuickLook from "./GameQuickLook";
+import MiniGameCenter from "./MiniGameCenter";
 
 function teamLogoUrl(teamId: number): string {
   return `https://www.mlbstatic.com/team-logos/${teamId}.svg`;
-}
-
-function headshotUrl(playerId?: number): string {
-  return playerId
-    ? `https://img.mlbstatic.com/mlb-photos/image/upload/w_96,q_auto:best,f_auto/v1/people/${playerId}/headshot/67/current`
-    : "";
 }
 
 function recordLabel(team: MlbTeamSide): string {
@@ -53,68 +52,23 @@ function TeamRow({ team, showScore }: { team: MlbTeamSide; showScore: boolean })
   );
 }
 
-function MiniDiamond({ situation }: { situation: LiveGameSituation }) {
-  return (
-    <div className="miniDiamond" aria-label={`${situation.outs} outs; runners on ${[
-      situation.firstOccupied && "first",
-      situation.secondOccupied && "second",
-      situation.thirdOccupied && "third",
-    ].filter(Boolean).join(", ") || "no bases"}`}>
-      <span className={`miniBase miniSecond${situation.secondOccupied ? " occupied" : ""}`} />
-      <span className={`miniBase miniThird${situation.thirdOccupied ? " occupied" : ""}`} />
-      <span className={`miniBase miniFirst${situation.firstOccupied ? " occupied" : ""}`} />
-      <span className="miniHome" />
-    </div>
-  );
-}
-
-function OutsDisplay({ outs }: { outs: number }) {
-  return (
-    <div className="miniOuts" aria-label={`${outs} outs`}>
-      {[0, 1, 2].map((index) => <span key={index} className={index < outs ? "recorded" : ""} />)}
-    </div>
-  );
-}
-
-function MiniPlayer({ label, name, playerId }: { label: string; name: string; playerId?: number }) {
-  return (
-    <div className="miniPlayer">
-      {playerId
-        ? <img src={headshotUrl(playerId)} alt="" width={38} height={38} />
-        : <span className="miniPlayerPlaceholder" aria-hidden="true" />}
-      <div><span>{label}</span><strong>{name}</strong></div>
-    </div>
-  );
-}
-
-function MiniGameCenter({ situation }: { situation: LiveGameSituation }) {
-  return (
-    <section className="miniGameCenter" aria-label="Current game situation">
-      <div className="miniSituationTop">
-        <MiniDiamond situation={situation} />
-        <div className="miniGameState">
-          <div className="miniCount"><strong>{situation.balls}-{situation.strikes}</strong><span>Count</span></div>
-          <div className="miniOutBlock"><OutsDisplay outs={situation.outs} /><span>Outs</span></div>
-        </div>
-      </div>
-      <div className="miniMatchup">
-        <MiniPlayer label="At bat" name={situation.batter} playerId={situation.batterId} />
-        <MiniPlayer label="Pitching" name={situation.pitcher} playerId={situation.pitcherId} />
-      </div>
-      {situation.lastPitch && <div className="miniLastPitch"><span>Last pitch</span><strong>{situation.lastPitch}</strong></div>}
-    </section>
-  );
-}
-
 export default function GameCard({ game, situation }: { game: MlbGame; situation?: LiveGameSituation | null }) {
+  const [expanded, setExpanded] = useState(false);
   const showScore = game.status.abstractGameState !== "Preview";
   const live = game.status.abstractGameState === "Live";
   const awayPitcher = game.teams.away.probablePitcher?.fullName;
   const homePitcher = game.teams.home.probablePitcher?.fullName;
+  const matchupLabel = `${game.teams.away.team.name} at ${game.teams.home.team.name}`;
 
   return (
-    <Link className="gameCardLink" href={`/games/${game.gamePk}`} aria-label={`Open ${game.teams.away.team.name} at ${game.teams.home.team.name} Game Center`}>
-      <article className={`gameCard${live ? " liveGameCard" : ""}`}>
+    <article className={`gameCard${live ? " liveGameCard" : ""}`}>
+      <button
+        type="button"
+        className="gameCardToggle"
+        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={expanded}
+        aria-label={`${expanded ? "Collapse" : "Expand"} quick look for ${matchupLabel}`}
+      >
         <div className="gameCardHeader">
           <span className={`statusBadge ${game.status.abstractGameState.toLowerCase()}`}>{statusLabel(game)}</span>
           <span className="venue">{game.venue?.name ?? "Venue TBD"}</span>
@@ -137,8 +91,21 @@ export default function GameCard({ game, situation }: { game: MlbGame; situation
           <div><span>Away TV</span><strong>{tvBroadcastLabel(game.broadcasts, "away")}</strong></div>
           <div><span>Home TV</span><strong>{tvBroadcastLabel(game.broadcasts, "home")}</strong></div>
         </div>
-        <div className="openGameCenter">Open Game Center →</div>
-      </article>
-    </Link>
+        <div className="quickLookHint">{expanded ? "Hide quick look ▲" : "Quick look ▼"}</div>
+      </button>
+
+      {expanded && (
+        <GameQuickLook
+          gamePk={game.gamePk}
+          status={game.status.abstractGameState}
+          awayName={game.teams.away.team.name}
+          homeName={game.teams.home.team.name}
+        />
+      )}
+
+      <Link className="openGameCenter" href={`/games/${game.gamePk}`} aria-label={`Open full Game Center for ${matchupLabel}`}>
+        Open full Game Center →
+      </Link>
+    </article>
   );
 }

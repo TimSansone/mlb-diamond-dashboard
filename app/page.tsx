@@ -1,6 +1,7 @@
 import BaseballCentral from "@/components/BaseballCentral";
 import DateNavigator from "@/components/DateNavigator";
 import GameCard from "@/components/GameCard";
+import LiveAlerts from "@/components/LiveAlerts";
 import ScoreboardAutoRefresh from "@/components/ScoreboardAutoRefresh";
 import { getBaseballCentral } from "@/lib/baseball-central";
 import { getLiveGameSituations } from "@/lib/live-situations";
@@ -31,7 +32,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   return (
     <section className="scoreboardPage">
       <DateNavigator date={selectedDate} today={today} />
-      <ScoreboardAutoRefresh active={isToday} />
+      {isToday && (
+        <div className="controlsRow">
+          <ScoreboardAutoRefresh active={isToday} />
+          <LiveAlerts games={games} />
+        </div>
+      )}
 
       <div className="scoreboardSummary">
         <div>

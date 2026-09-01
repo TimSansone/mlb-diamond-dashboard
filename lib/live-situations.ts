@@ -17,7 +17,21 @@ type PlayEvent = {
   details?: { isPitch?: boolean; description?: string; call?: { description?: string }; type?: { description?: string } };
   pitchData?: { startSpeed?: number };
 };
-type LiveFeed = {
+type Play = {
+  result?: { description?: string; event?: string };
+  about?: { inning?: number; halfInning?: string; isScoringPlay?: boolean };
+  count?: { balls?: number; strikes?: number; outs?: number };
+  matchup?: { batter?: Person; pitcher?: Person };
+  playEvents?: PlayEvent[];
+};
+type InningLine = {
+  num: number;
+  away?: { runs?: number; hits?: number; errors?: number };
+  home?: { runs?: number; hits?: number; errors?: number };
+};
+type Decisions = { winner?: Person; loser?: Person; save?: Person };
+
+export type LiveFeed = {
   liveData?: {
     linescore?: {
       balls?: number;
@@ -25,14 +39,17 @@ type LiveFeed = {
       outs?: number;
       offense?: { first?: Person; second?: Person; third?: Person };
       defense?: { pitcher?: Person };
-    };
-    plays?: {
-      currentPlay?: {
-        count?: { balls?: number; strikes?: number; outs?: number };
-        matchup?: { batter?: Person; pitcher?: Person };
-        playEvents?: PlayEvent[];
+      innings?: InningLine[];
+      teams?: {
+        away?: { runs?: number; hits?: number; errors?: number };
+        home?: { runs?: number; hits?: number; errors?: number };
       };
     };
+    plays?: {
+      currentPlay?: Play;
+      allPlays?: Play[];
+    };
+    decisions?: Decisions;
   };
 };
 
@@ -45,6 +62,27 @@ function lastPitchLabel(events?: PlayEvent[]) {
     pitch.details?.call?.description ?? pitch.details?.description ?? "",
   ].filter(Boolean);
   return parts.join(" · ") || undefined;
+}
+
+export function parseLiveSituation(feed: LiveFeed): LiveGameSituation {
+  const line = feed.liveData?.linescore;
+  const play = feed.liveData?.plays?.currentPlay;
+  const batter = play?.matchup?.batter;
+  const pitcher = play?.matchup?.pitcher ?? line?.defense?.pitcher;
+
+  return {
+    balls: line?.balls ?? play?.count?.balls ?? 0,
+    strikes: line?.strikes ?? play?.count?.strikes ?? 0,
+    outs: line?.outs ?? play?.count?.outs ?? 0,
+    firstOccupied: Boolean(line?.offense?.first),
+    secondOccupied: Boolean(line?.offense?.second),
+    thirdOccupied: Boolean(line?.offense?.third),
+    batter: batter?.fullName ?? "TBD",
+    batterId: batter?.id,
+    pitcher: pitcher?.fullName ?? "TBD",
+    pitcherId: pitcher?.id,
+    lastPitch: lastPitchLabel(play?.playEvents),
+  };
 }
 
 async function getLiveSituation(gamePk: number): Promise<LiveGameSituation | null> {
@@ -62,24 +100,7 @@ async function getLiveSituation(gamePk: number): Promise<LiveGameSituation | nul
 
     if (!response.ok) return null;
     const feed = await response.json() as LiveFeed;
-    const line = feed.liveData?.linescore;
-    const play = feed.liveData?.plays?.currentPlay;
-    const batter = play?.matchup?.batter;
-    const pitcher = play?.matchup?.pitcher ?? line?.defense?.pitcher;
-
-    return {
-      balls: line?.balls ?? play?.count?.balls ?? 0,
-      strikes: line?.strikes ?? play?.count?.strikes ?? 0,
-      outs: line?.outs ?? play?.count?.outs ?? 0,
-      firstOccupied: Boolean(line?.offense?.first),
-      secondOccupied: Boolean(line?.offense?.second),
-      thirdOccupied: Boolean(line?.offense?.third),
-      batter: batter?.fullName ?? "TBD",
-      batterId: batter?.id,
-      pitcher: pitcher?.fullName ?? "TBD",
-      pitcherId: pitcher?.id,
-      lastPitch: lastPitchLabel(play?.playEvents),
-    };
+    return parseLiveSituation(feed);
   } catch {
     return null;
   }

@@ -171,28 +171,53 @@ main {
   gap: 18px;
 }
 
-.gameCardLink {
-  display: block;
-  border-radius: 16px;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
-
-.gameCardLink:hover {
-  transform: translateY(-3px);
-}
-
-.gameCardLink:focus-visible {
-  outline: 3px solid rgba(11, 59, 112, 0.3);
-  outline-offset: 3px;
-}
-
 .gameCard {
+  display: flex;
   overflow: hidden;
+  flex-direction: column;
   height: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--shadow);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.gameCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover, 0 16px 38px rgba(17, 37, 66, 0.14));
+}
+
+.gameCardToggle {
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.gameCardToggle:focus-visible {
+  outline: 3px solid rgba(11, 59, 112, 0.3);
+  outline-offset: -3px;
+}
+
+.quickLookHint {
+  padding: 8px 16px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+  background: var(--surface-muted);
+}
+
+.gameCardToggle:hover .quickLookHint {
+  color: var(--primary);
 }
 
 .gameCardHeader {
@@ -641,5 +666,254 @@ main {
   .gameCenterTeam img {
     width: 56px;
     height: 56px;
+  }
+}
+
+.openGameCenter {
+  display: block;
+  padding: 12px 16px;
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.openGameCenter:hover {
+  color: var(--primary-strong);
+  background: var(--surface-muted);
+}
+
+.quickLook {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface-muted);
+  border-top: 1px solid var(--border);
+}
+
+.quickLookState {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.quickLookLine {
+  overflow-x: auto;
+}
+
+.quickLookLine table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.quickLookLine th,
+.quickLookLine td {
+  padding: 5px 7px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.quickLookLine th[scope="row"] {
+  overflow: hidden;
+  max-width: 120px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickLookLine thead th {
+  color: var(--muted);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quickLookPlay {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.quickLookPlay span {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quickLookDecisions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.quickLookLink {
+  justify-self: center;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.quickLookLink:hover {
+  color: var(--primary-strong);
+}
+
+.controlsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: -8px;
+}
+
+.autoRefreshBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.refreshToggle,
+.refreshNowButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.refreshToggle[aria-pressed="false"] {
+  color: var(--muted);
+}
+
+.refreshToggle:hover,
+.refreshNowButton:hover {
+  border-color: var(--primary);
+}
+
+.refreshNowButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.scoreRefreshStatus {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.alertsToggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  color: var(--primary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.alertsToggle[aria-pressed="false"] {
+  color: var(--muted);
+}
+
+.alertsToggle:hover {
+  border-color: var(--primary);
+}
+
+.alertsStack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: grid;
+  gap: 10px;
+  width: min(340px, calc(100vw - 36px));
+}
+
+.alertToast {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  color: #fff;
+  background: var(--primary-strong);
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(17, 37, 66, 0.24);
+  animation: alertToastIn 220ms ease;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.alertToast-score {
+  background: #0b3b70;
+}
+
+.alertToast-final {
+  background: #17663a;
+}
+
+.alertToast-start {
+  background: #55606f;
+}
+
+.alertToast-favorite {
+  border: 2px solid #f5c542;
+}
+
+.alertToast button {
+  flex-shrink: 0;
+  padding: 0 2px;
+  color: rgba(255, 255, 255, 0.8);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.alertToast button:hover {
+  color: #fff;
+}
+
+@keyframes alertToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 700px) {
+  .alertsStack {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
   }
 }
