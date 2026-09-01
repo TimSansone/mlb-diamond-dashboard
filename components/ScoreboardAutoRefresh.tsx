@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-const REFRESH_SECONDS = 30;
+const REFRESH_SECONDS = 20;
 const STORAGE_KEY = "mlb-auto-refresh-enabled";
 
 export default function ScoreboardAutoRefresh({ active }: { active: boolean }) {
